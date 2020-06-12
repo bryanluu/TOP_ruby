@@ -23,7 +23,6 @@ end
 # Tic-Tac-Toe board
 class Board
   def initialize
-    @turn_number = 0
     @board = [[], [], []]
     for i in 0...3
       for j in 0...3
@@ -48,32 +47,7 @@ class Board
   def valid_coord?(row, col)
     (0...3).include?(row) && (0...3).include?(col)
   end
-
-  def set_x(row, col)
-    @turn_number += 1
-    set_to_symbol('x', row, col)
-  end
-
-  def set_o(row, col)
-    set_to_symbol('o', row, col)
-  end
-
-  def winner
-    return nil unless @turn_number >= 3
-
-    directions = %i[horizontal vertical
-                    diagonal antidiagonal]
-    victor = nil
-    for dir in directions
-      victor = check_win(dir)
-      if victor
-        return victor
-      end
-    end
-  end
-
-  private
-
+  
   def set_to_symbol(symbol, row, col)
     return puts 'Out of range' unless valid_coord?(row, col)
 
@@ -84,6 +58,21 @@ class Board
       return nil
     end
   end
+
+  def winner
+    directions = %i[horizontal vertical
+                    diagonal antidiagonal]
+    victor = nil
+    directions.each do |dir|
+      victor = check_win(dir)
+      if victor
+        return victor
+      end
+    end
+    return nil
+  end
+
+  private
 
   def check_row_equal(row)
     if @board[row][0].symbol == @board[row][1].symbol &&
@@ -138,6 +127,49 @@ class Board
       end
     end
     return nil
+  end
+end
+
+class Game
+  def initialize
+    @turn = 'x'
+    @turn_number = 0
+    @board = Board.new
+  end
+
+  def play_game
+    winner = nil
+    while winner.nil? do
+      puts @board
+      play_round
+      winner = @board.winner
+    end
+    puts @board
+    puts "#{winner} wins in #{@turn_number} turns!"
+    return winner
+  end
+
+  private
+
+  def play_round
+    if @turn == 'x'
+      @turn_number += 1
+    end
+    puts "(#{@turn}) Enter row, then space, then column (0,0 top left)"
+    row, col = gets.chomp.split.map { |x| x.to_i }
+    while @board.set_to_symbol(@turn, row, col).nil? do
+      puts "(#{@turn}) Enter row, then space, then column (0,0 top left)"
+      row, col = gets.chomp.split.map { |x| x.to_i }
+    end
+    toggle_turn
+  end
+
+  def toggle_turn
+    if @turn == 'x'
+      @turn = 'o'
+    else
+      @turn = 'x'
+    end
   end
 end
 
