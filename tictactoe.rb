@@ -18,6 +18,10 @@ class Square
       puts 'Square already has symbol!'
     end
   end
+
+  def clear
+    @symbol = nil
+  end
 end
 
 # Tic-Tac-Toe board
@@ -47,7 +51,7 @@ class Board
   def valid_coord?(row, col)
     (0...3).include?(row) && (0...3).include?(col)
   end
-  
+
   def set_to_symbol(symbol, row, col)
     return puts 'Out of range' unless valid_coord?(row, col)
 
@@ -70,6 +74,18 @@ class Board
       end
     end
     return nil
+  end
+
+  def clear
+    for row in 0...3
+      for col in 0...3
+        @board[row][col].clear
+      end
+    end
+  end
+
+  def tie?
+    @board.flatten.all? { |sq| !sq.empty? }
   end
 
   private
@@ -130,6 +146,7 @@ class Board
   end
 end
 
+# Game of Tic-Tac-Toe
 class Game
   def initialize
     @turn = 'x'
@@ -143,9 +160,15 @@ class Game
       puts @board
       play_round
       winner = @board.winner
+      break if @board.tie?
     end
     puts @board
-    puts "#{winner} wins in #{@turn_number} turns!"
+    if winner
+      puts "#{winner} wins in #{@turn_number} turns!"
+    else
+      puts 'Tie.'
+    end
+    @board.clear
     return winner
   end
 
@@ -173,4 +196,14 @@ class Game
   end
 end
 
-binding.pry
+def positive?(response)
+  response.downcase == 'y' || response.downcase == 'yes'
+end
+
+game = Game.new
+response = 'y'
+while positive?(response) do
+  game.play_game
+  puts 'Play again?'
+  response = gets.chomp
+end
