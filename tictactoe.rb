@@ -29,9 +29,7 @@ class Board
   def initialize
     @board = [[], [], []]
     for i in 0...3
-      for j in 0...3
-        @board[i].push(Square.new)
-      end
+      (0...3).each { @board[i].push(Square.new) }
     end
   end
 
