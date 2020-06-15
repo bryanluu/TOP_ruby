@@ -43,21 +43,37 @@ class Code
     end
     feedback.map! { |x| COLORS[x] } # map to colors
   end
+
+  def correct?(code)
+    @row == code.row
+  end
 end
 
 # Class that represents a Decoding Board
 class Board
+  MAX_TURNS = 12
+
   def initialize(code)
     @code = Code.new(code)
+    @turns = 0
   end
 
-  def get_feedback(code)
-    @code.compare(code)
+  def guess(code)
+    @turns += 1
+    guessed = Code.new(code)
+    puts 'Guess:'
+    puts guessed
+    puts 'Feedback:'
+    feedback = @code.compare(guessed)
+    puts feedback
+    puts 'You win!' if (@turns <= MAX_TURNS) && (guessed.correct? @code)
+    puts 'You lose!' if @turns > MAX_TURNS
+    feedback
   end
 end
 
 b = Board.new([1, 1, 1, 0])
-c = Code.new([1, 1, 0, 1])
-p b.get_feedback(c)
+c = [1, 1, 1, 0]
+b.guess(c)
 
 # binding.pry
