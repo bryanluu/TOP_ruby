@@ -41,7 +41,7 @@ class Code
       # prepend a red peg and remove a white peg for correct pegs in code
       feedback.unshift(2) and feedback.pop if x == @row[i]
     end
-    feedback.map! { |x| COLORS[x] } # map to colors
+    feedback
   end
 
   def correct?(code)
@@ -53,6 +53,8 @@ end
 class Board
   MAX_TURNS = 12
 
+  attr_reader :code
+
   def initialize(code)
     @code = Code.new(code)
     @turns = 0
@@ -60,6 +62,7 @@ class Board
 
   def guess(code)
     @turns += 1
+    puts "Turn: #{@turns}"
     guessed = Code.new(code)
     puts 'Guess:'
     puts guessed
@@ -73,46 +76,76 @@ class Board
   end
 
   def lose?
-    @turns > MAX_TURNS
+    @turns >= MAX_TURNS
   end
-
 end
 
 # Game of Mastermind
 class Game
-  def initialize(repeats_allowed = false, codemaker_cpu = true)
+  def initialize(repeats_allowed = false, codebreaker_cpu = false, codemaker_cpu = true)
     @repeats_allowed = repeats_allowed
     @codemaker_cpu = codemaker_cpu
+    @codebreaker_cpu = codebreaker_cpu
+  end
+
+  def play
+    board = Board.new(generate_code(@codemaker_cpu))
+    code = generate_code(@codebreaker_cpu)
+    p code
+    feedback = board.guess(code)
+    until board.win?(code) || board.lose?
+      p(feedback.map { |x| Code::COLORS[x] })
+      code = generate_code(@codebreaker_cpu)
+      feedback = board.guess(code)
+    end
+    end_game(board)
+  end
+
+  private
+
+  # end game
+  def end_game(board)
+    puts board.lose? ? 'You lost.' : 'You win!'
+    puts "Code: #{board.code}"
   end
 
   # generate a code
   def generate_code(cpu = false)
     if cpu
-      if @repeats_allowed
-        code = []
-        4.times { code << Code::COLORS.keys.sample }
-      else
-        Code::COLORS.keys.sample(4)
-      end
+      random_code
     else
       prompt_code
     end
   end
 
-  private
+  # generates a random code
+  def random_code
+    if @repeats_allowed
+      code = []
+      4.times { code << Code::COLORS.keys.sample }
+    else
+      Code::COLORS.keys.sample(4)
+    end
+  end
 
+  # prompts user for input for a code
   def prompt_code
-    puts Code::COLORS
-    puts 'Enter a code using integers from 0 to 5, separated by spaces:'
+    code_prompt
     trialcode = gets.chomp.split.map(&:to_i)
     return trialcode if @repeats_allowed
 
     while has_repeats?(trialcode)
       puts 'No repeats allowed!'
-      puts Code::COLORS
-      puts 'Enter a code using integers from 0 to 5, separated by spaces:'
+      code_prompt
       trialcode = gets.chomp.split.map(&:to_i)
     end
+    trialcode
+  end
+
+  # code prompt
+  def code_prompt
+    puts Code::COLORS
+    puts 'Enter a code using integers from 0 to 5, separated by spaces:'
   end
 
   # whether anything repeats in array
