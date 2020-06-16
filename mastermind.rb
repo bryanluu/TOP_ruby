@@ -70,32 +70,33 @@ class Board
     @code.compare(guessed)
   end
 
-  def win?(code)
+  def code_broken?(code)
     guessed = Code.new(code)
     guessed.correct? @code
   end
 
-  def lose?
+  def out_of_turns?
     @turns >= MAX_TURNS
   end
 end
 
 # Game of Mastermind
 class Game
-  def initialize(repeats_allowed = false, codebreaker_cpu = false, codemaker_cpu = true)
+  def initialize
+    repeats_allowed, codemaker_cpu, codebreaker_cpu = prompt_config
     @repeats_allowed = repeats_allowed
     @codemaker_cpu = codemaker_cpu
     @codebreaker_cpu = codebreaker_cpu
   end
 
   def play
-    board = Board.new(generate_code(@codemaker_cpu))
-    code = generate_code(@codebreaker_cpu)
+    board = Board.new(generate_code)
+    code = guess_code
     p code
     feedback = board.guess(code)
-    until board.win?(code) || board.lose?
+    until board.code_broken?(code) || board.out_of_turns?
       p(feedback.map { |x| Code::COLORS[x] })
-      code = generate_code(@codebreaker_cpu)
+      code = guess_code
       feedback = board.guess(code)
     end
     end_game(board)
@@ -103,15 +104,44 @@ class Game
 
   private
 
+  # prompt config
+  def prompt_config
+    puts 'Allow repeats?'
+    repeats = affirmative?
+    puts 'CPU Codemaker?'
+    codemaker_cpu = affirmative?
+    puts 'CPU Codebreaker?'
+    codebreaker_cpu = affirmative?
+    [repeats, codemaker_cpu, codebreaker_cpu]
+  end
+
+  def affirmative?
+    input = gets.chomp
+    input.downcase == 'y' || input.downcase == 'yes'
+  end
+
   # end game
   def end_game(board)
-    puts board.lose? ? 'You lost.' : 'You win!'
+    puts board.out_of_turns? ? 'Codemaker wins!' : 'Codebreaker wins!'
     puts "Code: #{board.code}"
   end
 
+  def guess_code
+    if @codebreaker_cpu
+      puts 'CPU guessed:'
+      p((code = random_code).map{ |x| Code::COLORS[x] })
+      puts 'Press enter to continue...'
+      gets
+      code
+    else
+      prompt_code
+    end
+  end
+
   # generate a code
-  def generate_code(cpu = false)
-    if cpu
+  def generate_code
+    if @codemaker_cpu
+      puts 'Code chosen by CPU.'
       random_code
     else
       prompt_code
@@ -154,8 +184,7 @@ class Game
   end
 end
 
-b = Board.new([1, 1, 1, 0])
-c = [1, 1, 1, 0]
-b.guess(c)
+g = Game.new
+g.play
 
-binding.pry
+# binding.pry
