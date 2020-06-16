@@ -8,7 +8,7 @@ class Square
   end
 
   def empty?
-    symbol == nil
+    symbol.nil?
   end
 
   def symbol=(sym)
@@ -29,7 +29,7 @@ class Board
   def initialize
     @board = [[], [], []]
     for i in 0...3
-      (0...3).each { @board[i].push(Square.new) }
+      3.times { @board[i].push(Square.new) }
     end
   end
 
