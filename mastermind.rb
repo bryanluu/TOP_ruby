@@ -53,7 +53,7 @@ end
 class Board
   MAX_TURNS = 12
 
-  attr_reader :code
+  attr_reader :code, :turns
 
   def initialize(code)
     @code = Code.new(code)
@@ -102,7 +102,24 @@ class Game
     end_game(board)
   end
 
-  private
+  # private
+
+  # generates all possible codes for Knuth algorithm
+  def all_possible_codes
+    colors = Code::COLORS.keys
+    colors.product(colors, colors, colors)
+  end
+
+  # removal step for Knuth algorithm
+  def purge_code_set(codeset, guess, feedback)
+    code = Code.new(guess)
+    s = codeset[0..-1] # copy codeset
+    codeset.each do |x|
+      c = Code.new(x)
+      s.delete(x) if code.compare(c) != feedback
+    end
+    codeset
+  end
 
   # prompt config
   def prompt_config
@@ -185,6 +202,6 @@ class Game
 end
 
 g = Game.new
-g.play
+# g.play
 
-# binding.pry
+binding.pry
