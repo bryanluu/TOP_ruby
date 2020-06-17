@@ -118,7 +118,29 @@ class Game
       c = Code.new(x)
       s.delete(x) if code.compare(c) != feedback
     end
-    codeset
+    s
+  end
+
+  # minmax step for Knuth algorithm
+  def minmax(codeset, unused_codes)
+    minmax = codeset.length # largest max possible
+    code = -1
+    unused_codes.each do |i|
+      g = Code.new(i)
+      table = {}
+      max = -1
+      codeset.each do |j|
+        c = Code.new(j)
+        s = c.compare(g)
+        table[s] = table.fetch(s, 0) + 1
+        max = table[s] if table[s] > max
+      end
+      if max < minmax
+        code = i
+        minmax = max
+      end
+    end
+    code
   end
 
   # prompt config
