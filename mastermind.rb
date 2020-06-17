@@ -67,7 +67,9 @@ class Board
     puts 'Guess:'
     puts guessed
     puts 'Feedback:'
-    @code.compare(guessed)
+    feedback = @code.compare(guessed)
+    p(feedback.map { |x| Code::COLORS[x] })
+    feedback
   end
 
   def code_broken?(code)
@@ -87,16 +89,16 @@ class Game
     @repeats_allowed = repeats_allowed
     @codemaker_cpu = codemaker_cpu
     @codebreaker_cpu = codebreaker_cpu
+    @unused_codes = nil
+    @codeset = nil
   end
 
   def play
     board = Board.new(generate_code)
-    code = guess_code
-    p code
+    code = guess_code(nil, nil)
     feedback = board.guess(code)
     until board.code_broken?(code) || board.out_of_turns?
-      p(feedback.map { |x| Code::COLORS[x] })
-      code = guess_code
+      code = guess_code(code, feedback)
       feedback = board.guess(code)
     end
     end_game(board)
@@ -122,9 +124,9 @@ class Game
   end
 
   # minmax step for Knuth algorithm
-  def minmax(codeset, unused_codes)
-    minmax = codeset.length # largest max possible
-    code = -1
+  def minimax(codeset, unused_codes)
+    minmax = codeset.length + 1 # largest max possible
+    code = nil
     unused_codes.each do |i|
       g = Code.new(i)
       table = {}
@@ -136,11 +138,35 @@ class Game
         max = table[s] if table[s] > max
       end
       if max < minmax
-        code = i
+        code = []
+        code << i
         minmax = max
+      elsif max == minmax
+        code << i
       end
     end
     code
+  end
+
+  # get a Knuth solution from the set
+  def get_next_knuth_code(codes)
+    codes.each { |c| return c if @codeset.include?(c) }
+    codes.each { |c| return c if @unused_codes.include?(c) }
+    codes[0] # never reached
+  end
+
+  # Knuth solution
+  def guess_knuth(guess, feedback)
+    if @unused_codes.nil?
+      @unused_codes = all_possible_codes
+      @unused_codes.delete(guess)
+      @codeset = purge_code_set(@unused_codes, guess, feedback)
+    else
+      @codeset = purge_code_set(@codeset, guess, feedback)
+    end
+    codes = minimax(@codeset, @unused_codes)
+    code = get_next_knuth_code(codes)
+    @unused_codes.delete(code)
   end
 
   # prompt config
@@ -165,10 +191,13 @@ class Game
     puts "Code: #{board.code}"
   end
 
-  def guess_code
+  def guess_code(guess, feedback)
     if @codebreaker_cpu
-      puts 'CPU guessed:'
-      p((code = random_code).map{ |x| Code::COLORS[x] })
+      if guess.nil?
+        code = [0, 0, 1, 1]
+      else
+        code = guess_knuth(guess, feedback)
+      end
       puts 'Press enter to continue...'
       gets
       code
@@ -224,6 +253,6 @@ class Game
 end
 
 g = Game.new
-# g.play
+g.play
 
-binding.pry
+# binding.pry
