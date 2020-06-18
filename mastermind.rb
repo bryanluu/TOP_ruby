@@ -1,5 +1,3 @@
-require 'pry'
-
 # Class that represents a code
 class Code
   COLORS = { 0 => :black,
@@ -69,6 +67,8 @@ class Board
     puts 'Feedback:'
     feedback = @code.compare(guessed)
     p(feedback.map { |x| Code::COLORS[x] })
+    puts 'Press enter to continue...'
+    gets
     feedback
   end
 
@@ -94,8 +94,10 @@ class Game
   end
 
   def play
+    puts "=== Codemaker's Turn ==="
     board = Board.new(generate_code)
-    code = guess_code(nil, nil)
+    puts "=== Codebreaker's Turn ==="
+    code = guess_code
     feedback = board.guess(code)
     until board.code_broken?(code) || board.out_of_turns?
       code = guess_code(code, feedback)
@@ -104,7 +106,7 @@ class Game
     end_game(board)
   end
 
-  # private
+  private
 
   # generates all possible codes for Knuth algorithm
   def all_possible_codes
@@ -138,8 +140,7 @@ class Game
         max = table[s] if table[s] > max
       end
       if max < minmax
-        code = []
-        code << i
+        code = [i]
         minmax = max
       elsif max == minmax
         code << i
@@ -191,16 +192,13 @@ class Game
     puts "Code: #{board.code}"
   end
 
-  def guess_code(guess, feedback)
+  def guess_code(guess=nil, feedback=nil)
     if @codebreaker_cpu
-      if guess.nil?
-        code = [0, 0, 1, 1]
+      if guess.nil? || feedback.nil?
+        random_code
       else
-        code = guess_knuth(guess, feedback)
+        guess_knuth(guess, feedback)
       end
-      puts 'Press enter to continue...'
-      gets
-      code
     else
       prompt_code
     end
@@ -221,6 +219,7 @@ class Game
     if @repeats_allowed
       code = []
       4.times { code << Code::COLORS.keys.sample }
+      code
     else
       Code::COLORS.keys.sample(4)
     end
@@ -254,5 +253,3 @@ end
 
 g = Game.new
 g.play
-
-# binding.pry
