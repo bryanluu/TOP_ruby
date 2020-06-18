@@ -128,25 +128,25 @@ class Game
   # minmax step for Knuth algorithm
   def minimax(codeset, unused_codes)
     minmax = codeset.length + 1 # largest max possible
-    code = nil
+    codes = nil
     unused_codes.each do |i|
       g = Code.new(i)
-      table = {}
+      table = {} # table of feedback hits
       max = -1
       codeset.each do |j|
         c = Code.new(j)
-        s = c.compare(g)
+        s = c.compare(g) # feedback from c compared with g
         table[s] = table.fetch(s, 0) + 1
         max = table[s] if table[s] > max
       end
       if max < minmax
-        code = [i]
+        codes = [i] # add new minimax to empty list
         minmax = max
       elsif max == minmax
-        code << i
+        codes << i # add solution to minimax list
       end
     end
-    code
+    codes
   end
 
   # get a Knuth solution from the set
@@ -192,6 +192,7 @@ class Game
     puts "Code: #{board.code}"
   end
 
+  # generate a guess for the code
   def guess_code(guess=nil, feedback=nil)
     if @codebreaker_cpu
       if guess.nil? || feedback.nil?
