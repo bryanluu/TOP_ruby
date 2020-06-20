@@ -22,7 +22,7 @@ def legislators_by_zipcode(zip)
 end
 
 def save_thank_you_letter(id,form_letter)
-  Dir.mkdir("../output") unless Dir.exists?("../output")
+  Dir.mkdir("../output") unless Dir.exist?("../output")
 
   filename = "../output/thanks_#{id}.html"
 
