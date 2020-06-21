@@ -11,17 +11,56 @@ class Game
     @word = get_word_from_dictionary(DICTIONARY)
     @correct = Set.new
     @incorrect = Set.new
-    @incorrect_guesses_allowed = 11
+    @mistakes_left = 11
   end
 
-  # private
+  def play
+    until game_over?
+      puts display_word
+      puts "Incorrect: #{@incorrect}" unless @incorrect.empty?
+      puts "Mistakes remaining: #{@mistakes_left}"
+      input_guess
+    end
+    puts lose? ? 'You lost...' : 'You win!'
+    puts "The word was #{@word}"
+  end
+
+  private
+
+  def input_guess
+    guess = prompt_guess
+    until new_guess? guess
+      puts 'Already guessed that!'
+      guess = prompt_guess
+    end
+    if guess.length == 1
+      guess_letter(guess)
+    else
+      guess_word(guess)
+    end
+  end
+
+  def prompt_guess
+    puts 'Guess a letter or word:'
+    gets.chomp.downcase
+  end
+
+  def new_guess?(guess)
+    return true unless @correct.include?(guess) || @incorrect.include?(guess)
+
+    false
+  end
+
+  def game_over?
+    win? || lose?
+  end
 
   def win?
     @word.split('').to_set == @correct
   end
 
   def lose?
-    @incorrect_guesses_allowed <= 0
+    @mistakes_left <= 0
   end
 
   def display_word
@@ -34,7 +73,8 @@ class Game
     if word == @word
       @correct << word.split('')
     else
-      @incorrect_guesses_allowed -= 1
+      @mistakes_left -= 1
+      @incorrect << word
     end
   end
 
@@ -42,7 +82,7 @@ class Game
     if @word.include? letter
       @correct << letter
     else
-      @incorrect_guesses_allowed -= 1
+      @mistakes_left -= 1
       @incorrect << letter
     end
   end
@@ -59,4 +99,5 @@ class Game
   end
 end
 
-binding.pry
+g = Game.new
+g.play
