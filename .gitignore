@@ -1,3 +1,4 @@
 .vscode/
 *.output
 event_manager/output/
+*.save

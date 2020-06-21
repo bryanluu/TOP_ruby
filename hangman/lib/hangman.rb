@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'pry'
 require 'set'
+require 'json'
 
 # Hangman game class
 class Game
@@ -29,8 +29,8 @@ class Game
 
   def input_guess
     guess = prompt_guess
-    until new_guess? guess
-      puts 'Already guessed that!'
+    until valid_guess? guess
+      save?(guess) ? save(guess) : (puts 'Already guessed that.')
       guess = prompt_guess
     end
     if guess.length == 1
@@ -40,8 +40,33 @@ class Game
     end
   end
 
+  def save(input)
+    filename = input.split.last + '.save'
+    if File.exist? filename
+      puts "Overwrite #{filename}?"
+      return unless affirmative?
+    end
+    File.open(filename, 'w') do |file|
+      file.puts to_json # save Game as JSON string to filename
+    end
+    puts "Saved game to #{filename}."
+  end
+
+  def affirmative?
+    input = gets.chomp.downcase
+    %w[y yes].include? input
+  end
+
+  def valid_guess?(input)
+    new_guess?(input) && !save?(input)
+  end
+
+  def save?(input)
+    input.split.first == '--save'
+  end
+
   def prompt_guess
-    puts 'Guess a letter or word:'
+    puts "Guess a letter or word, or type '--save name' to save game to a file:"
     gets.chomp.downcase
   end
 
