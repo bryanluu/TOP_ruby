@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 require 'set'
-require 'json'
+require 'yaml'
+
+def affirmative?
+  input = gets.chomp.downcase
+  %w[y yes].include? input
+end
 
 # Hangman game class
 class Game
@@ -30,7 +35,7 @@ class Game
   def input_guess
     guess = prompt_guess
     until valid_guess? guess
-      save?(guess) ? save(guess) : (puts 'Already guessed that.')
+      save?(guess) ? save(guess) : (puts 'Already guessed that.' unless guess.empty?)
       guess = prompt_guess
     end
     if guess.length == 1
@@ -47,18 +52,13 @@ class Game
       return unless affirmative?
     end
     File.open(filename, 'w') do |file|
-      file.puts to_json # save Game as JSON string to filename
+      file.puts Marshal.dump(self) # save Game as binary string to filename
     end
     puts "Saved game to #{filename}."
   end
 
-  def affirmative?
-    input = gets.chomp.downcase
-    %w[y yes].include? input
-  end
-
   def valid_guess?(input)
-    new_guess?(input) && !save?(input)
+    new_guess?(input) && !save?(input) && !input.empty?
   end
 
   def save?(input)
@@ -66,7 +66,7 @@ class Game
   end
 
   def prompt_guess
-    puts "Guess a letter or word, or type '--save name' to save game to a file:"
+    puts "Guess a letter or word, or type '--save file' to save game to 'file.save':"
     gets.chomp.downcase
   end
 
@@ -96,7 +96,7 @@ class Game
 
   def guess_word(word)
     if word == @word
-      @correct << word.split('')
+      word.split('').each { |letter| @correct << letter }
     else
       @mistakes_left -= 1
       @incorrect << word
@@ -124,5 +124,12 @@ class Game
   end
 end
 
-g = Game.new
+puts 'Load game from file?'
+if affirmative?
+  puts 'Enter name:'
+  obj = File.read(gets.chomp + '.save')
+  g = Marshal.load(obj)
+else
+  g = Game.new
+end
 g.play
