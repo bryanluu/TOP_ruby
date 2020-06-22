@@ -182,8 +182,8 @@ class Game
   end
 
   def affirmative?
-    input = gets.chomp
-    input.downcase == 'y' || input.downcase == 'yes'
+    input = gets.chomp.downcase
+    %w[y yes].include? input
   end
 
   # end game
