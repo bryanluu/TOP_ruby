@@ -44,7 +44,7 @@ class Tree
   # insert value into the tree and return root
   def insert(value)
     node = Node.new(value)
-    return (@root = node) if curr.nil?
+    return (@root = node) if root.nil?
 
     curr = root
     loop do
@@ -74,12 +74,10 @@ class Tree
     parent = nil
     curr = root
     until value == curr.value
+      return nil if curr.nil? # value not present in BST
+
       parent = curr
-      if value < curr.value
-        curr = curr.left
-      else
-        curr = curr.right
-      end
+      curr = (value < curr.value ? curr.left : curr.right)
     end
 
     if curr == root
@@ -146,5 +144,18 @@ class Tree
       end
     end
     root
+  end
+
+  # Find and return the node with the given value, otherwise return nil if not found.
+  def find(value)
+    return nil if root.nil?
+
+    curr = root
+    loop do
+      return nil if curr.nil?
+      return curr if value == curr.value
+
+      curr = (value < curr.value ? curr.left : curr.right)
+    end
   end
 end
