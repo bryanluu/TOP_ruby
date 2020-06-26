@@ -165,7 +165,7 @@ class Tree
   def level_order
     return nil if root.nil?
 
-    q = [root]
+    q = [root] # queue for breath-first traversal
     level_order_array = []
     until q.empty?
       node = q.shift
@@ -181,10 +181,9 @@ class Tree
   def inorder
     return nil if root.nil?
 
-    stack = [] # fake call stack
+    stack = [] # stack
     inorder_array = []
     curr = root
-
     until curr.nil? && stack.empty?
       # go leftward until curr is nil
       until curr.nil?
@@ -192,17 +191,50 @@ class Tree
         curr = curr.left
       end
       # curr is nil
-
       curr = stack.pop # get new node from call stack
-
       # process node
       yield curr if block_given?
       inorder_array.push(curr)
-
       # travel right
       curr = curr.right
     end
     inorder_array
+  end
+
+  # Yields nodes preorder of BST if block is given, returns as preorder array of nodes
+  def preorder
+    return nil if root.nil?
+
+    stack = [root] # stack
+    preorder_array = []
+    until stack.empty?
+      curr = stack.pop # get new node from call stack
+      # process node
+      yield curr if block_given?
+      preorder_array.push(curr)
+      # push children onto stack so that left child is processed first
+      stack.push(curr.right) unless curr.right.nil?
+      stack.push(curr.left) unless curr.left.nil?
+    end
+    preorder_array
+  end
+
+  # Yields nodes postorder of BST if block is given, returns as postorder array of nodes
+  def postorder
+    return nil if root.nil?
+
+    stack = [root] # stack
+    postorder_array = [] # use this as a second 'stack'
+    until stack.empty?
+      curr = stack.pop # get new node from call stack
+      postorder_array.push(curr) # push onto second 'stack'
+      # push children onto stack
+      stack.push(curr.left) unless curr.left.nil?
+      stack.push(curr.right) unless curr.right.nil?
+    end
+    postorder_array.reverse! # reverse array to get postorder
+    postorder_array.each { |node| yield node } if block_given?
+    postorder_array
   end
 end
 
