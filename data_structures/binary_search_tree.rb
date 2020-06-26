@@ -158,4 +158,20 @@ class Tree
       curr = (value < curr.value ? curr.left : curr.right)
     end
   end
+
+  # Yields nodes in level-order of the BST to the block if given, returns a level-order array of nodes
+  def level_order
+    return nil if root.nil?
+
+    q = [root]
+    level_order_array = []
+    until q.empty?
+      node = q.shift
+      q.push(node.left) unless node.left.nil?
+      q.push(node.right) unless node.right.nil?
+      level_order_array.push(node)
+      yield node if block_given?
+    end
+    level_order_array
+  end
 end
