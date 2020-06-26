@@ -75,11 +75,11 @@ class Tree
 
     parent = nil
     curr = root
-    until value == curr.value
+    until value == curr.data
       return nil if curr.nil? # value not present in BST
 
       parent = curr
-      curr = (value < curr.value ? curr.left : curr.right)
+      curr = (value < curr.data ? curr.left : curr.right)
     end
 
     if curr == root
@@ -90,16 +90,19 @@ class Tree
       elsif curr.right.nil?
         @root = curr.left
       else
-        min_parent = curr
-        min = curr.right
-        until min.left.nil?
+        # find the minimum node in right subtree
+        min_parent = curr # parent of minimum node
+        min = curr.right # minimum node
+        until min.left.nil? # find and set minimum node and parent
           min_parent = min
           min = min.left
         end
-        @root = Node.new(min.value)
-        root.left = curr.right.left
-        root.right = curr.right.right
-        min_parent.left = nil
+        node = Node.new(min.data) # create a copy node of min node
+        node.left = curr.left
+        node.right = curr.right
+        @root = node # replace deleted node with minimum node
+        # delete old minimum node location
+        min_parent == curr ? node.right = min.right : min_parent.left = nil
       end
       return root
     end
@@ -112,17 +115,19 @@ class Tree
       elsif curr.right.nil?
         parent.left = curr.left
       else
-        min_parent = curr
-        min = curr.left
-        until min.right.nil?
+        # find the minimum node in right subtree
+        min_parent = curr # parent of minimum node
+        min = curr.right # minimum node
+        until min.left.nil? # find and set minimum node and parent
           min_parent = min
-          min = min.right
+          min = min.left
         end
-        node = Node.new(min.value)
-        node.left = curr.left.left
-        node.right = curr.left.right
-        parent.left = node
-        min_parent.right = nil
+        node = Node.new(min.data) # create a copy node of min node
+        node.left = curr.left
+        node.right = curr.right
+        parent.left = node # replace deleted node with minimum node
+        # delete old minimum node location
+        min_parent == curr ? node.right = min.right : min_parent.left = nil
       end
     else
       if curr.left.nil? && curr.right.nil?
@@ -132,17 +137,19 @@ class Tree
       elsif curr.right.nil?
         parent.right = curr.left
       else
-        min_parent = curr
-        min = curr.right
-        until min.left.nil?
+        # find the minimum node in right subtree
+        min_parent = curr # parent of minimum node
+        min = curr.right # minimum node
+        until min.left.nil? # find and set minimum node and parent
           min_parent = min
           min = min.left
         end
-        node = Node.new(min.value)
-        node.left = curr.right.left
-        node.right = curr.right.right
-        parent.right = node
-        min_parent.left = nil
+        node = Node.new(min.data) # create a copy node of min node
+        node.left = curr.left
+        node.right = curr.right
+        parent.right = node # replace deleted node with minimum node
+        # delete old minimum node location
+        min_parent == curr ? node.right = nil : min_parent.left = nil
       end
     end
     root
@@ -155,9 +162,9 @@ class Tree
     curr = root
     loop do
       return nil if curr.nil?
-      return curr if value == curr.value
+      return curr if value == curr.data
 
-      curr = (value < curr.value ? curr.left : curr.right)
+      curr = (value < curr.data ? curr.left : curr.right)
     end
   end
 
@@ -235,6 +242,14 @@ class Tree
     postorder_array.reverse! # reverse array to get postorder
     postorder_array.each { |node| yield node } if block_given?
     postorder_array
+  end
+
+  # calculates the number of levels beneath the given node
+  def self.depth(node)
+    return -1 if node.nil?
+
+    # the depth is the max of the depths of the children plus 1
+    [depth(node.left), depth(node.right)].max + 1
   end
 end
 
