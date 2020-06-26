@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'pry'
+
 # Class that implements a Binary-Search-Tree (BST) Node
 class Node
   include Comparable
@@ -33,7 +35,7 @@ class Tree
   def build_tree(array)
     return nil if array.empty?
 
-    a = array.sort.uniq!
+    a = array.sort.uniq
     mid = a.length / 2
     node = Node.new(a[mid])
     node.left = build_tree(a[0...mid])
@@ -174,4 +176,34 @@ class Tree
     end
     level_order_array
   end
+
+  # Yields nodes inorder of BST if block is given, returns as inorder array of nodes
+  def inorder
+    return nil if root.nil?
+
+    stack = [] # fake call stack
+    inorder_array = []
+    curr = root
+
+    until curr.nil? && stack.empty?
+      # go leftward until curr is nil
+      until curr.nil?
+        stack.push(curr)
+        curr = curr.left
+      end
+      # curr is nil
+
+      curr = stack.pop # get new node from call stack
+
+      # process node
+      yield curr if block_given?
+      inorder_array.push(curr)
+
+      # travel right
+      curr = curr.right
+    end
+    inorder_array
+  end
 end
+
+binding.pry
