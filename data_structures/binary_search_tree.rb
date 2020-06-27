@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
-
 # Class that implements a Binary-Search-Tree (BST) Node
 class Node
   include Comparable
@@ -48,6 +46,8 @@ class Tree
     node = Node.new(value)
     return (@root = node) if root.nil?
 
+    return nil unless find(value).nil?
+
     curr = root
     loop do
       if node < curr
@@ -91,18 +91,8 @@ class Tree
         @root = curr.left
       else
         # find the minimum node in right subtree
-        min_parent = curr # parent of minimum node
-        min = curr.right # minimum node
-        until min.left.nil? # find and set minimum node and parent
-          min_parent = min
-          min = min.left
-        end
-        node = Node.new(min.data) # create a copy node of min node
-        node.left = curr.left
-        node.right = curr.right
+        node = copy_and_delete_min_in_right_subtree_of(curr)
         @root = node # replace deleted node with minimum node
-        # delete old minimum node location
-        min_parent == curr ? node.right = min.right : min_parent.left = nil
       end
       return root
     end
@@ -116,18 +106,8 @@ class Tree
         parent.left = curr.left
       else
         # find the minimum node in right subtree
-        min_parent = curr # parent of minimum node
-        min = curr.right # minimum node
-        until min.left.nil? # find and set minimum node and parent
-          min_parent = min
-          min = min.left
-        end
-        node = Node.new(min.data) # create a copy node of min node
-        node.left = curr.left
-        node.right = curr.right
+        node = copy_and_delete_min_in_right_subtree_of(curr)
         parent.left = node # replace deleted node with minimum node
-        # delete old minimum node location
-        min_parent == curr ? node.right = min.right : min_parent.left = nil
       end
     else
       if curr.left.nil? && curr.right.nil?
@@ -138,18 +118,8 @@ class Tree
         parent.right = curr.left
       else
         # find the minimum node in right subtree
-        min_parent = curr # parent of minimum node
-        min = curr.right # minimum node
-        until min.left.nil? # find and set minimum node and parent
-          min_parent = min
-          min = min.left
-        end
-        node = Node.new(min.data) # create a copy node of min node
-        node.left = curr.left
-        node.right = curr.right
+        node = copy_and_delete_min_in_right_subtree_of(curr)
         parent.right = node # replace deleted node with minimum node
-        # delete old minimum node location
-        min_parent == curr ? node.right = nil : min_parent.left = nil
       end
     end
     root
@@ -251,6 +221,55 @@ class Tree
     # the depth is the max of the depths of the children plus 1
     [depth(node.left), depth(node.right)].max + 1
   end
+
+  # returns whether the tree is balanced
+  def balanced?
+    # tree is balanced if the difference between left and right depths is within 1
+    (Tree.depth(root.left) - Tree.depth(root.right)).abs <= 1
+  end
+
+  # rebalances the tree
+  def rebalance!
+    @root = build_tree(level_order)
+  end
+
+  private
+
+  def copy_and_delete_min_in_right_subtree_of(curr)
+    # find the minimum node in right subtree
+    min_parent = curr # parent of minimum node
+    min = curr.right # minimum node
+    until min.left.nil? # find and set minimum node and parent
+      min_parent = min
+      min = min.left
+    end
+    node = Node.new(min.data) # create a copy node of min node
+    node.left = curr.left
+    node.right = curr.right
+    # delete old minimum node location
+    min_parent == curr ? node.right = min.right : min_parent.left = nil
+    node
+  end
 end
 
-binding.pry
+array = Array.new(15) { rand(0..100) } # random array of numbers between 0 and 100
+tree = Tree.new(array) # create tree using random array
+puts tree.balanced?
+p tree.level_order
+p tree.preorder
+p tree.postorder
+p tree.inorder
+5.times { tree.insert(rand(101..110)) }
+puts tree.balanced?
+tree.rebalance!
+puts tree.balanced?
+p tree.level_order
+p tree.preorder
+p tree.postorder
+p tree.inorder
+tree.delete(tree.root.data)
+p tree.level_order
+p tree.preorder
+p tree.postorder
+p tree.inorder
+
