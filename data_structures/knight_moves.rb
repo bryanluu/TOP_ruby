@@ -55,20 +55,13 @@ class Knight
     history << position
   end
 
-  private
-
   # checks if the knight can move to the given position
   def self.valid_move?(origin, destination)
     horizontal_movement = destination.first - origin.first
     vertical_movement = destination.last - origin.last
     ((horizontal_movement.abs == 1 && vertical_movement.abs == 2) || \
       (horizontal_movement.abs == 2 && vertical_movement.abs == 1)) && \
-      destination.first.between?(0, 8) && destination.last.between?(0, 8)
-  end
-
-  # gets list of possible different positions to move to from knight's position
-  def possible_moves
-    Knight.possible_moves_from(@position)
+      destination.first.between?(0, 7) && destination.last.between?(0, 7)
   end
 
   # gets list of possible different positions to move to from given position
@@ -85,11 +78,33 @@ class Knight
     movable_spots.select { |destination| valid_move?(position, destination) }
   end
 
+  private
+
+  # gets list of possible different positions to move to from knight's position
+  def possible_moves
+    Knight.possible_moves_from(@position)
+  end
+
   # populate the adjacency list of moves
   range = Array(0...8)
   positions = range.product(range)
   positions.each do |pos|
-    @@adj_list[pos] = Knight.possible_moves_from(pos)
+    @@adj_list[pos] = possible_moves_from(pos)
+  end
+
+  public
+
+  # find the shortest path to the destination from Knight's position
+  def shortest_path_to(destination)
+    q = [[position]] # queue for BFS, initialized with Knight's current position-path
+    until q.empty?
+      path = q.shift # get next path
+      curr = path.last # get curr node
+      return path if curr == destination # successfully found the shortest path to destination
+
+      # add children of the current position
+      @@adj_list[curr].each { |next_dest| q << path + [next_dest] }
+    end
   end
 end
 
