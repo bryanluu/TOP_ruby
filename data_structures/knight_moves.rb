@@ -49,7 +49,7 @@ class Knight
   end
 
   def move_to(position)
-    return nil unless valid_move? position
+    return nil unless Knight.valid_move?(@position, position)
 
     @position = position
     history << position
@@ -108,4 +108,18 @@ class Knight
   end
 end
 
-binding.pry
+# Returns the shortest path a knight can take from origin to destination
+def knight_moves(origin, destination)
+  board = Board.new(origin)
+  shortest_path = board.knight.shortest_path_to(destination)
+  shortest_path[1..-1].each { |pos| board.knight.move_to(pos) }
+  puts "Knight can take #{shortest_path.length} moves to get there:"
+  p shortest_path
+  puts board
+end
+
+puts "Enter the Knight's origin as two numbers between 0-7 spaced apart:"
+origin = gets.chomp.split.map(&:to_i)
+puts "Enter the Knight's destination as two numbers between 0-7 spaced apart:"
+destination = gets.chomp.split.map(&:to_i)
+knight_moves(origin, destination)
