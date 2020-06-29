@@ -29,8 +29,6 @@ class Tree
     @root = build_tree(array)
   end
 
-  private
-
   # builds a balanced tree from array
   def build_tree(array)
     return nil if array.empty?
@@ -42,8 +40,6 @@ class Tree
     node.right = build_tree(a[mid+1..-1])
     node
   end
-
-  public
 
   # insert value into the tree and return root
   def insert(value)
@@ -263,3 +259,4 @@ p tree.level_order
 p tree.preorder
 p tree.postorder
 p tree.inorder
+
