@@ -155,27 +155,14 @@ class Tree
   end
 
   # Yields nodes inorder of BST if block is given, returns as inorder array of nodes
-  def inorder
-    return nil if root.nil?
+  def inorder(node = root, array = [], &block)
+    return nil if node.nil?
 
-    stack = [] # stack
-    inorder_array = []
-    curr = root
-    until curr.nil? && stack.empty?
-      # go leftward until curr is nil
-      until curr.nil?
-        stack.push(curr)
-        curr = curr.left
-      end
-      # curr is nil
-      curr = stack.pop # get new node from call stack
-      # process node
-      yield curr if block_given?
-      inorder_array.push(curr)
-      # travel right
-      curr = curr.right
-    end
-    inorder_array
+    inorder(node.left, array, &block) unless node.left.nil?
+    yield node if block_given?
+    array << node
+    inorder(node.right, array, &block) unless node.right.nil?
+    array
   end
 
   # Yields nodes preorder of BST if block is given, returns as preorder array of nodes
