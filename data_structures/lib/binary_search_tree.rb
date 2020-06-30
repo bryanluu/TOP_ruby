@@ -25,9 +25,11 @@ end
 class Tree
   attr_reader :root
 
-  def initialize(array)
+  def initialize(array = [])
     @root = build_tree(array)
   end
+
+  private
 
   # builds a balanced tree from array
   def build_tree(array)
@@ -40,6 +42,8 @@ class Tree
     node.right = build_tree(a[mid+1..-1])
     node
   end
+
+  public
 
   # insert value into the tree and return root
   def insert(value)
@@ -76,10 +80,9 @@ class Tree
     parent = nil
     curr = root
     until value == curr.data
-      return nil if curr.nil? # value not present in BST
-
       parent = curr
       curr = (value < curr.data ? curr.left : curr.right)
+      return nil if curr.nil? # value not present in BST
     end
 
     if curr == root
@@ -259,4 +262,3 @@ p tree.level_order
 p tree.preorder
 p tree.postorder
 p tree.inorder
-
