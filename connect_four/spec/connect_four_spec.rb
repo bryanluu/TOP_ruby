@@ -3,18 +3,18 @@
 require './lib/connect_four'
 
 describe Cage do
-  describe '#to_a' do
-    it 'creates an array for the cage' do
+  describe '#initialize' do
+    it 'creates an empty array for the cage' do
       cage = Cage.new
       expected_array = Array.new(6) { Array.new(7) { Cage.empty_symbol } }
-      expect(cage.to_a).to eq(expected_array)
+      expect(cage.array).to eq(expected_array)
     end
   end
   describe '#to_s' do
     it 'creates a string for the cage' do
       cage = Cage.new
       rows = []
-      cage.to_a.each do |row|
+      cage.array.each do |row|
         rows << row.join
       end
       expected_str = rows.join("\n")
@@ -26,7 +26,7 @@ describe Cage do
       cage = Cage.new
       column = rand(0...7)
       cage.drop!(column)
-      expect(cage.to_a[5][column]).to eq(Cage.white_token)
+      expect(cage.array[5][column]).to eq(Cage.white_token)
     end
     it 'drops and returns true when successful' do
       cage = Cage.new
@@ -38,7 +38,7 @@ describe Cage do
       column = rand(0...7)
       cage.drop!(column)
       cage.drop!(column)
-      expect(cage.to_a[5][column] == Cage.white_token && cage.to_a[4][column] == Cage.black_token).to be(true)
+      expect(cage.array[5][column] == Cage.white_token && cage.array[4][column] == Cage.black_token).to be(true)
     end
     it 'returns false when column is full' do
       cage = Cage.new
