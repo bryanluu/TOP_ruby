@@ -46,29 +46,16 @@ class Tree
   public
 
   # insert value into the tree and return root
-  def insert(value)
+  def insert(value, root = @root)
     node = Node.new(value)
-    return (@root = node) if root.nil?
+    return (root == @root ? @root = node : node) if root.nil?
 
     return nil unless find(value).nil?
 
-    curr = root
-    loop do
-      if node < curr
-        if curr.left.nil?
-          curr.left = node
-          break
-        else
-          curr = curr.left
-        end
-      else
-        if curr.right.nil?
-          curr.right = node
-          break
-        else
-          curr = curr.right
-        end
-      end
+    if node < root
+      root.left = insert(value, root.left)
+    else
+      root.right = insert(value, root.right)
     end
     root
   end
@@ -169,39 +156,24 @@ class Tree
   end
 
   # Yields nodes preorder of BST if block is given, returns as preorder array of nodes
-  def preorder
+  def preorder(node = root, array = [], &block)
     return nil if root.nil?
 
-    stack = [root] # stack
-    preorder_array = []
-    until stack.empty?
-      curr = stack.pop # get new node from call stack
-      # process node
-      yield curr if block_given?
-      preorder_array.push(curr)
-      # push children onto stack so that left child is processed first
-      stack.push(curr.right) unless curr.right.nil?
-      stack.push(curr.left) unless curr.left.nil?
-    end
-    preorder_array
+    yield node if block_given?
+    array << node
+    preorder(node.left, array, &block) unless node.left.nil?
+    preorder(node.right, array, &block) unless node.right.nil?
+    array
   end
 
   # Yields nodes postorder of BST if block is given, returns as postorder array of nodes
-  def postorder
+  def postorder(node = root, array = [], &block)
     return nil if root.nil?
 
-    stack = [root] # stack
-    postorder_array = [] # use this as a second 'stack'
-    until stack.empty?
-      curr = stack.pop # get new node from call stack
-      postorder_array.push(curr) # push onto second 'stack'
-      # push children onto stack
-      stack.push(curr.left) unless curr.left.nil?
-      stack.push(curr.right) unless curr.right.nil?
-    end
-    postorder_array.reverse! # reverse array to get postorder
-    postorder_array.each { |node| yield node } if block_given?
-    postorder_array
+    postorder(node.left, array, &block) unless node.left.nil?
+    postorder(node.right, array, &block) unless node.right.nil?
+    yield node if block_given?
+    array << node
   end
 
   # calculates the number of levels beneath the given node

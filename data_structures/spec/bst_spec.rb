@@ -56,6 +56,11 @@ describe Tree do
       tree.insert(value)
       expect(tree.root.data).to be(value)
     end
+    it 'returns node if empty child passed' do
+      value = 0
+      tree = Tree.new([1])
+      expect(tree.insert(value, tree.root.left).data).to be(value)
+    end
     it 'adds a value smaller than root as the left child' do
       value = rand(0..10)
       tree = Tree.new([20])
