@@ -116,16 +116,11 @@ class Tree
   end
 
   # Find and return the node with the given value, otherwise return nil if not found.
-  def find(value)
+  def find(value, root = @root)
     return nil if root.nil?
+    return root if root.data == value
 
-    curr = root
-    loop do
-      return nil if curr.nil?
-      return curr if value == curr.data
-
-      curr = (value < curr.data ? curr.left : curr.right)
-    end
+    value < root.data ? find(value, root.left) : find(value, root.right)
   end
 
   # Yields nodes in level-order of the BST to the block if given, returns a level-order array of nodes
