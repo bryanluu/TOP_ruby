@@ -22,23 +22,23 @@ describe Cage do
     end
   end
   describe '#drop!' do
-    it 'drops a white token first in the corresponding column' do
+    it 'drops a red token first in the corresponding column' do
       cage = Cage.new
       column = rand(0...7)
       cage.drop!(column)
-      expect(cage.array[5][column]).to eq(Cage.white_token)
+      expect(cage.array[5][column]).to eq(Cage.red_token)
     end
     it 'drops and returns true when successful' do
       cage = Cage.new
       column = rand(0...7)
       expect(cage.drop!(column)).to be(true)
     end
-    it 'drops a black token after dropping white token' do
+    it 'drops a yellow token after dropping red token' do
       cage = Cage.new
       column = rand(0...7)
       cage.drop!(column)
       cage.drop!(column)
-      expect(cage.array[5][column] == Cage.white_token && cage.array[4][column] == Cage.black_token).to be(true)
+      expect(cage.array[5][column] == Cage.red_token && cage.array[4][column] == Cage.yellow_token).to be(true)
     end
     it 'returns false when column is full' do
       cage = Cage.new
