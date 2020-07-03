@@ -2,7 +2,7 @@
 
 # Class that implements a Binary-Search-Tree (BST) Node
 class Node
-  include Comparable
+  include Comparable, Enumerable
   attr_reader :data
   attr_accessor :left, :right
 
@@ -188,6 +188,11 @@ class Tree
   # rebalances the tree
   def rebalance!
     @root = build_tree(level_order)
+  end
+
+  # checks whether correct BST
+  def correct?
+    inorder.each_cons(2).all? { |p, n| p <= n }
   end
 
   private

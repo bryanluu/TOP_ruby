@@ -101,7 +101,7 @@ describe Tree do
       tree = Tree.new(array)
       value = array.sample
       tree.delete(value)
-      expect(tree.find(value)).to be(nil)
+      expect(tree.find(value).nil? && tree.correct?).to be(true)
     end
     it 'does nothing on empty tree' do
       tree = Tree.new
@@ -230,6 +230,19 @@ describe Tree do
       tree.insert(11)
       tree.rebalance!
       expect(tree.balanced?).to be(true)
+    end
+  end
+  describe '#correct?' do
+    it 'returns false correctly' do
+      tree = Tree.new([5])
+      tree.root.left = Node.new(6)
+      tree.root.right = Node.new(4)
+      expect(tree.correct?).to be(false)
+    end
+    it 'returns true correctly' do
+      array = Array.new(100) { rand(0..100) }
+      tree = Tree.new(array)
+      expect(tree.correct?).to be(true)
     end
   end
 end
