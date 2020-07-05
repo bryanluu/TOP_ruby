@@ -6,13 +6,13 @@ describe Piece do
   describe '#initialize' do
     it 'stores the position' do
       board = Board.new
-      pos = Array(2) { rand(0...Board.SIDE_LENGTH) }
+      pos = Vector.new(Array(2) { rand(0...Board.SIDE_LENGTH) })
       piece = Piece.new(board, pos)
       expect(piece.position).to eq(pos)
     end
     it 'activates the piece' do
       board = Board.new
-      pos = Array(2) { rand(0...Board.SIDE_LENGTH) }
+      pos = Vector.new(Array(2) { rand(0...Board.SIDE_LENGTH) })
       piece = Piece.new(board, pos)
       expect(piece.active?).to be(true)
     end
@@ -20,25 +20,28 @@ describe Piece do
   describe '#move!' do
     it 'adjusts position' do
       board = Board.new
-      pos = Array(2) { rand(0...Board.SIDE_LENGTH) }
+      pos = Vector.new(Array(2) { rand(0...Board.SIDE_LENGTH) })
       piece = Piece.new(board, pos)
-      movement = Array(2) { rand(0...Board.SIDE_LENGTH) }
-      dest = [pos.first + movement.first, pos.last + movement.last]
-      expected = dest.first.between?(0, Board.SIDE_LENGTH-1) && dest.last.between?(0, Board.SIDE_LENGTH-1)
-      expect(piece.move!(movement)).to be(expected)
+      movement = Vector.new(Array(2) { rand(0...Board.SIDE_LENGTH) })
+      dest = pos + movement
+      valid = dest.to_a.first.between?(0, Board.SIDE_LENGTH-1) && dest.to_a.last.between?(0, Board.SIDE_LENGTH-1)
+      success = piece.move!(movement)
+      new_pos = piece.position
+      expected_pos = (valid ? dest : pos)
+      expect(success == valid && expected_pos == new_pos).to be(true)
     end
     it 'does nothing for invalid move' do
       board = Board.new
-      pos = [0, 0]
+      pos = Vector.new([0, 0])
       piece = Piece.new(board, pos)
-      movement = [-1, -1]
+      movement = Vector.new([-1, -1])
       expect(piece.move!(movement)).to be(false)
     end
   end
   describe '#kill!' do
     it 'de-activates the piece' do
       board = Board.new
-      piece = Piece.new(board, [0, 0])
+      piece = Piece.new(board, Vector.new([0, 0]))
       piece.kill!
       expect(piece.active?).to be(false)
     end
