@@ -47,3 +47,22 @@ describe Piece do
     end
   end
 end
+
+describe 'King' do
+  describe '#valid_move?' do
+    it 'returns true for single step' do
+      board = Board.new
+      king = King.new(board, Vector.new([1, 1]), :White)
+      steps = [-1, 0, 1]
+      moves = steps.product(steps) # the single steps around current position
+      moves.delete([0, 0]) # delete current position
+      moves.map! { |move| Vector.new(move) } # convert moves into Vectors
+      expect(moves.all? { |move| king.valid_move?(move) }).to be(true)
+    end
+    it 'returns false for invalid step' do
+      board = Board.new
+      king = King.new(board, Vector.new([0, 0]), :White)
+      expect(king.valid_move?(Vector.new([2, 2]))).to be(false)
+    end
+  end
+end
