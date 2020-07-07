@@ -66,3 +66,46 @@ describe 'King' do
     end
   end
 end
+
+describe 'Queen' do
+  describe '#valid_move?' do
+    it 'returns true correctly for horizontal motion' do
+      board = Board.new
+      queen = Queen.new(board, Vector.new([0, 0]), :White)
+      moves = Array(1...Board::SIDE_LENGTH) # the range of horizontal motion
+      moves.map! { |step| Vector.new([0, step]) } # creates the move vectors
+      expect(moves.all? { |move| queen.valid_move?(move) }).to be(true)
+    end
+    it 'returns true correctly for vertical motion' do
+      board = Board.new
+      queen = Queen.new(board, Vector.new([0, 0]), :White)
+      moves = Array(1...Board::SIDE_LENGTH) # the range of horizontal motion
+      moves.map! { |step| Vector.new([step, 0]) } # creates the move vectors
+      expect(moves.all? { |move| queen.valid_move?(move) }).to be(true)
+    end
+    it 'returns true correctly for diagonal motion' do
+      board = Board.new
+      queen = Queen.new(board, Vector.new([0, 0]), :White)
+      moves = Array(1...Board::SIDE_LENGTH) # the range of horizontal motion
+      moves.map! { |step| Vector.new([step, step]) } # creates the move vectors
+      expect(moves.all? { |move| queen.valid_move?(move) }).to be(true)
+    end
+    it 'returns true correctly for antidiagonal motion' do
+      board = Board.new
+      queen = Queen.new(board, Vector.new([0, 0]), :White)
+      moves = Array(1...Board::SIDE_LENGTH) # the range of horizontal motion
+      moves.map! { |step| Vector.new([step, -step]) } # creates the move vectors
+      expect(moves.all? { |move| queen.valid_move?(move) }).to be(true)
+    end
+    it 'returns false correctly for no motion' do
+      board = Board.new
+      queen = Queen.new(board, Vector.new([0, 0]), :White)
+      expect(queen.valid_move?(Vector.zero)).to be(false)
+    end
+    it 'returns false correctly for invalid motion' do
+      board = Board.new
+      queen = Queen.new(board, Vector.new([0, 0]), :White)
+      expect(queen.valid_move?(Vector.new([2, 1]))).to be(false)
+    end
+  end
+end

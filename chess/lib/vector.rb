@@ -42,4 +42,8 @@ class Vector
   def inspect
     "\#<#{ndim}-dim. Vector: " + @data.inspect + '>'
   end
+
+  def self.zero
+    Vector.new([0, 0])
+  end
 end

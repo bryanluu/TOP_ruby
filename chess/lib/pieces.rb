@@ -53,8 +53,8 @@ end
 
 # Implements a King
 class King < Piece
-  @@black_symbol = "\u265B"
-  @@white_symbol = "\u2655"
+  @@black_symbol = "\u265A"
+  @@white_symbol = "\u2654"
   @@black_symbol.freeze
   @@white_symbol.freeze
 
@@ -64,6 +64,25 @@ class King < Piece
     moves = steps.product(steps) # the single steps around current position
     moves.delete([0, 0]) # delete current position
     @moveset = moves.map { |move| Vector.new(move) } # convert moves into Vectors
+  end
+end
+
+# Implements a Queen
+class Queen < Piece
+  @@black_symbol = "\u265B"
+  @@white_symbol = "\u2655"
+  @@black_symbol.freeze
+  @@white_symbol.freeze
+
+  def initialize(board, position, color)
+    super(board, position, color)
+    steps = Array(1...Board::SIDE_LENGTH)
+    steps = steps.reverse.map(&:-@) + steps
+    horizontal = steps.map { |step| Vector.new([0, step]) }
+    vertical = steps.map { |step| Vector.new([step, 0]) }
+    diagonal = steps.map { |step| Vector.new([step, step]) }
+    antidiagonal = steps.map { |step| Vector.new([step, -step]) }
+    @moveset = horizontal + vertical + diagonal + antidiagonal
   end
 end
 
