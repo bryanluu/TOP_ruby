@@ -166,4 +166,26 @@ describe 'Queen' do
       end
     end
   end
+
+  describe 'Knight' do
+    describe '#valid_move?' do
+      it 'returns true correctly for L motion' do
+        board = Board.new
+        knight = Knight.new(board, Vector.new([0, 0]), :White)
+        moves = [1, -1].product([2, -2])
+        moves += moves.map(&:reverse) # creates the L-moveset
+        expect(moves.all? { |move| knight.valid_move?(move) }).to be(true)
+      end
+      it 'returns false correctly for no motion' do
+        board = Board.new
+        knight = Knight.new(board, Vector.new([0, 0]), :White)
+        expect(knight.valid_move?(Vector.zero)).to be(false)
+      end
+      it 'returns false correctly for invalid motion' do
+        board = Board.new
+        knight = Knight.new(board, Vector.new([0, 0]), :White)
+        expect(knight.valid_move?(Vector.new([1, 1]))).to be(false)
+      end
+    end
+  end
 end

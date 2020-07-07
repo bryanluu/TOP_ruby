@@ -120,4 +120,19 @@ class Bishop < Piece
   end
 end
 
+# Implements a Knight
+class Knight < Piece
+  @@black_symbol = "\u265E"
+  @@white_symbol = "\u2658"
+  @@black_symbol.freeze
+  @@white_symbol.freeze
+
+  def initialize(board, position, color)
+    super(board, position, color)
+    moves = [1, -1].product([2, -2])
+    moves += moves.map(&:reverse)
+    @moveset = moves.map { |move| Vector.new(move) }
+  end
+end
+
 # binding.pry
