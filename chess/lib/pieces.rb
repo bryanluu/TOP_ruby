@@ -49,6 +49,16 @@ class Piece
   def valid_move?(movement)
     @moveset.empty? || @moveset.include?(movement)
   end
+
+  # whether the piece is white
+  def white?
+    color == :White
+  end
+
+  # whether the piece is black
+  def black?
+    color == :Black
+  end
 end
 
 # Implements a King
@@ -132,6 +142,32 @@ class Knight < Piece
     moves = [1, -1].product([2, -2])
     moves += moves.map(&:reverse)
     @moveset = moves.map { |move| Vector.new(move) }
+  end
+end
+
+# Implements a Pawn
+class Pawn < Piece
+  @@black_symbol = "\u265F"
+  @@white_symbol = "\u2659"
+  @@black_symbol.freeze
+  @@white_symbol.freeze
+
+  def initialize(board, position, color)
+    super(board, position, color)
+    step = (white? ? -1 : 1)
+    moves = [[step, 0], [step, 1], [step, -1], [2 * step, 0]]
+    @moveset = moves.map { |move| Vector.new(move) }
+    @first_move = true
+  end
+
+  def move_to!(destination)
+    success = super(destination)
+    if success && @first_move
+      @first_move = false
+      step = (white? ? -1 : 1)
+      @moveset.delete([2 * step, 0])
+    end
+    success
   end
 end
 
