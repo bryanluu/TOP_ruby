@@ -103,4 +103,21 @@ class Rook < Piece
   end
 end
 
+# Implements a Bishop
+class Bishop < Piece
+  @@black_symbol = "\u265D"
+  @@white_symbol = "\u2657"
+  @@black_symbol.freeze
+  @@white_symbol.freeze
+
+  def initialize(board, position, color)
+    super(board, position, color)
+    steps = Array(1...Board::SIDE_LENGTH)
+    steps = steps.reverse.map(&:-@) + steps
+    diagonal = steps.map { |step| Vector.new([step, step]) }
+    antidiagonal = steps.map { |step| Vector.new([step, -step]) }
+    @moveset = diagonal + antidiagonal
+  end
+end
+
 # binding.pry

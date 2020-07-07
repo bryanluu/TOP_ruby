@@ -137,4 +137,33 @@ describe 'Queen' do
       end
     end
   end
+
+  describe 'Bishop' do
+    describe '#valid_move?' do
+      it 'returns true correctly for diagonal motion' do
+        board = Board.new
+        bishop = Bishop.new(board, Vector.new([0, 0]), :White)
+        moves = Array(1...Board::SIDE_LENGTH) # the range of horizontal motion
+        moves.map! { |step| Vector.new([step, step]) } # creates the move vectors
+        expect(moves.all? { |move| bishop.valid_move?(move) }).to be(true)
+      end
+      it 'returns true correctly for antidiagonal motion' do
+        board = Board.new
+        bishop = Bishop.new(board, Vector.new([0, 0]), :White)
+        moves = Array(1...Board::SIDE_LENGTH) # the range of horizontal motion
+        moves.map! { |step| Vector.new([step, -step]) } # creates the move vectors
+        expect(moves.all? { |move| bishop.valid_move?(move) }).to be(true)
+      end
+      it 'returns false correctly for no motion' do
+        board = Board.new
+        bishop = Bishop.new(board, Vector.new([0, 0]), :White)
+        expect(bishop.valid_move?(Vector.zero)).to be(false)
+      end
+      it 'returns false correctly for invalid motion' do
+        board = Board.new
+        bishop = Bishop.new(board, Vector.new([0, 0]), :White)
+        expect(bishop.valid_move?(Vector.new([1, 0]))).to be(false)
+      end
+    end
+  end
 end
