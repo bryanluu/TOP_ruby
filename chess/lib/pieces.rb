@@ -35,11 +35,6 @@ class Piece
     true
   end
 
-  # checks whether the move is valid for the piece
-  def valid_move?(movement)
-    @moveset.empty? || @moveset.include?(movement)
-  end
-
   # de-activates piece
   def kill!
     @active = false
@@ -48,6 +43,11 @@ class Piece
   # creates a string representation
   def to_s
     symbol.to_s + (active? ? "@#{position}" : '')
+  end
+
+  # checks whether the move is valid for the piece
+  def valid_move?(movement)
+    @moveset.empty? || @moveset.include?(movement)
   end
 end
 
@@ -83,6 +83,23 @@ class Queen < Piece
     diagonal = steps.map { |step| Vector.new([step, step]) }
     antidiagonal = steps.map { |step| Vector.new([step, -step]) }
     @moveset = horizontal + vertical + diagonal + antidiagonal
+  end
+end
+
+# Implements a Rook
+class Rook < Piece
+  @@black_symbol = "\u265C"
+  @@white_symbol = "\u2656"
+  @@black_symbol.freeze
+  @@white_symbol.freeze
+
+  def initialize(board, position, color)
+    super(board, position, color)
+    steps = Array(1...Board::SIDE_LENGTH)
+    steps = steps.reverse.map(&:-@) + steps
+    horizontal = steps.map { |step| Vector.new([0, step]) }
+    vertical = steps.map { |step| Vector.new([step, 0]) }
+    @moveset = horizontal + vertical
   end
 end
 
