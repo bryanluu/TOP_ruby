@@ -2,6 +2,7 @@
 
 class Board
   SIDE_LENGTH = 8
+  attr_reader :grid
 
   def initialize
     @grid = Array.new(8) do |row|
@@ -19,8 +20,8 @@ class Board
 
   def display
     str = String.new
-    @grid.each_with_index do |row|
-      row.each_with_index do |tile|
+    @grid.each do |row|
+      row.each do |tile|
         str << tile.to_s
       end
       str << "\n"
