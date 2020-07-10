@@ -8,8 +8,6 @@ require 'pry'
 class Piece
   attr_reader :position, :symbol, :color
   COLORS = %i[White Black].freeze
-  @@black_symbol = nil
-  @@white_symbol = nil
 
   def initialize(board, position, color = :White)
     @board = board
@@ -17,7 +15,15 @@ class Piece
     @active = true
     @moveset = []
     @color = color
-    @symbol = (color == :White ? @@white_symbol : @@black_symbol)
+    @symbol = (color == :White ? white_symbol : black_symbol)
+  end
+
+  def white_symbol
+    nil
+  end
+
+  def black_symbol
+    nil
   end
 
   # whether the piece is on the board
@@ -63,11 +69,6 @@ end
 
 # Implements a King
 class King < Piece
-  @@black_symbol = "\u265A"
-  @@white_symbol = "\u2654"
-  @@black_symbol.freeze
-  @@white_symbol.freeze
-
   def initialize(board, position, color)
     super(board, position, color)
     steps = [-1, 0, 1]
@@ -75,15 +76,18 @@ class King < Piece
     moves.delete([0, 0]) # delete current position
     @moveset = moves.map { |move| Vector.new(move) } # convert moves into Vectors
   end
+
+  def white_symbol
+    "\u2654"
+  end
+
+  def black_symbol
+    "\u265A"
+  end
 end
 
 # Implements a Queen
 class Queen < Piece
-  @@black_symbol = "\u265B"
-  @@white_symbol = "\u2655"
-  @@black_symbol.freeze
-  @@white_symbol.freeze
-
   def initialize(board, position, color)
     super(board, position, color)
     steps = Array(1...Board::SIDE_LENGTH)
@@ -94,15 +98,18 @@ class Queen < Piece
     antidiagonal = steps.map { |step| Vector.new([step, -step]) }
     @moveset = horizontal + vertical + diagonal + antidiagonal
   end
+
+  def white_symbol
+    "\u2655"
+  end
+
+  def black_symbol
+    "\u265B"
+  end
 end
 
 # Implements a Rook
 class Rook < Piece
-  @@black_symbol = "\u265C"
-  @@white_symbol = "\u2656"
-  @@black_symbol.freeze
-  @@white_symbol.freeze
-
   def initialize(board, position, color)
     super(board, position, color)
     steps = Array(1...Board::SIDE_LENGTH)
@@ -111,15 +118,18 @@ class Rook < Piece
     vertical = steps.map { |step| Vector.new([step, 0]) }
     @moveset = horizontal + vertical
   end
+
+  def white_symbol
+    "\u2656"
+  end
+
+  def black_symbol
+    "\u265C"
+  end
 end
 
 # Implements a Bishop
 class Bishop < Piece
-  @@black_symbol = "\u265D"
-  @@white_symbol = "\u2657"
-  @@black_symbol.freeze
-  @@white_symbol.freeze
-
   def initialize(board, position, color)
     super(board, position, color)
     steps = Array(1...Board::SIDE_LENGTH)
@@ -128,36 +138,50 @@ class Bishop < Piece
     antidiagonal = steps.map { |step| Vector.new([step, -step]) }
     @moveset = diagonal + antidiagonal
   end
+
+  def white_symbol
+    "\u2657"
+  end
+
+  def black_symbol
+    "\u265D"
+  end
 end
 
 # Implements a Knight
 class Knight < Piece
-  @@black_symbol = "\u265E"
-  @@white_symbol = "\u2658"
-  @@black_symbol.freeze
-  @@white_symbol.freeze
-
   def initialize(board, position, color)
     super(board, position, color)
     moves = [1, -1].product([2, -2])
     moves += moves.map(&:reverse)
     @moveset = moves.map { |move| Vector.new(move) }
   end
+
+  def white_symbol
+    "\u2658"
+  end
+
+  def black_symbol
+    "\u265E"
+  end
 end
 
 # Implements a Pawn
 class Pawn < Piece
-  @@black_symbol = "\u265F"
-  @@white_symbol = "\u2659"
-  @@black_symbol.freeze
-  @@white_symbol.freeze
-
   def initialize(board, position, color)
     super(board, position, color)
     step = (white? ? -1 : 1)
     moves = [[step, 0], [step, 1], [step, -1], [2 * step, 0]]
     @moveset = moves.map { |move| Vector.new(move) }
     @first_move = true
+  end
+
+  def white_symbol
+    "\u2659"
+  end
+
+  def black_symbol
+    "\u265F"
   end
 
   def move_to!(destination)
