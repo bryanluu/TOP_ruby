@@ -3,6 +3,14 @@
 # Implements a Chessboard
 class Board
   SIDE_LENGTH = 8
+  ROWS = {}
+  COLUMNS = {}
+  (1..SIDE_LENGTH).each { |row| ROWS[row] = SIDE_LENGTH - row }
+  %i[a b c d e f g h].each_with_index { |col, i| COLUMNS[col] = i }
+  SIDE_LENGTH.freeze
+  ROWS.freeze
+  COLUMNS.freeze
+
   attr_reader :grid
 
   def initialize
@@ -36,7 +44,6 @@ class Board
   private
 
   def spawn_pieces
-    puts Piece::COLORS
     Piece::COLORS.each do |color|
       spawn_king_row(color)
       spawn_pawns(color)
