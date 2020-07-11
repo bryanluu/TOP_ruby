@@ -15,23 +15,6 @@ class Board
     spawn_pieces
   end
 
-  def spawn_pieces
-    puts Piece::COLORS
-    Piece::COLORS.each do |color|
-      king_row = (color == :Black ? 0 : Board::SIDE_LENGTH - 1)
-      spawn_piece(Rook, [king_row, 0], color)
-      spawn_piece(Knight, [king_row, 1], color)
-      spawn_piece(Bishop, [king_row, 2], color)
-      spawn_piece(Queen, [king_row, 3], color)
-      spawn_piece(King, [king_row, 4], color)
-      spawn_piece(Bishop, [king_row, 5], color)
-      spawn_piece(Knight, [king_row, 6], color)
-      spawn_piece(Rook, [king_row, 7], color)
-      pawn_row = (color == :Black ? 1 : Board::SIDE_LENGTH - 2)
-      (0...Board::SIDE_LENGTH).each { |col| spawn_piece(Pawn, [pawn_row, col], color) }
-    end
-  end
-
   def valid_position?(position)
     row, col = position.to_a
     row.between?(0, Board::SIDE_LENGTH - 1) && col.between?(0, Board::SIDE_LENGTH - 1)
@@ -50,9 +33,34 @@ class Board
 
   private
 
+  def spawn_pieces
+    puts Piece::COLORS
+    Piece::COLORS.each do |color|
+      spawn_king_row(color)
+      spawn_pawns(color)
+    end
+  end
+
   def spawn_piece(piece, position, color)
     row, col = position
     grid[row][col].replace! piece.new(self, Vector.new(position), color)
+  end
+
+  def spawn_king_row(color)
+    king_row = (color == :Black ? 0 : Board::SIDE_LENGTH - 1)
+    spawn_piece(Rook, [king_row, 0], color)
+    spawn_piece(Knight, [king_row, 1], color)
+    spawn_piece(Bishop, [king_row, 2], color)
+    spawn_piece(Queen, [king_row, 3], color)
+    spawn_piece(King, [king_row, 4], color)
+    spawn_piece(Bishop, [king_row, 5], color)
+    spawn_piece(Knight, [king_row, 6], color)
+    spawn_piece(Rook, [king_row, 7], color)
+  end
+
+  def spawn_pawns(color)
+    pawn_row = (color == :Black ? 1 : Board::SIDE_LENGTH - 2)
+    (0...Board::SIDE_LENGTH).each { |col| spawn_piece(Pawn, [pawn_row, col], color) }
   end
 end
 

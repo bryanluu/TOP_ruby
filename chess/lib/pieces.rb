@@ -33,6 +33,8 @@ class Piece
 
   # returns false if destination cannot be reached, otherwise moves piece and returns true
   def move_to!(destination)
+    return false unless active?
+
     movement = destination - position
 
     return false unless @board.valid_position?(destination) && valid_move?(movement)
