@@ -22,12 +22,14 @@ class Board
 
   def display
     str = String.new
-    @grid.each do |row|
-      row.each do |tile|
-        str << tile.to_s
-      end
+    @grid.each_with_index do |row, i|
+      str << "#{Board::SIDE_LENGTH - i} "
+      str << row.map(&:to_s).join(' ')
       str << "\n"
     end
+    str << '  '
+    str << %i[a b c d e f g h].map(&:to_s).join(' ')
+    str << "\n"
     puts str
   end
 
