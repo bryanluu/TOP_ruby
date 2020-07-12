@@ -11,8 +11,6 @@ class Board
   ROWS.freeze
   COLUMNS.freeze
 
-  attr_reader :grid
-
   def initialize
     @grid = Array.new(8) do |row|
       Array.new(8) do |col|
@@ -21,6 +19,14 @@ class Board
       end
     end
     spawn_pieces
+  end
+
+  def [](vector)
+    raise ArgumentError, 'Can only be indexed by Vectors' unless vector.is_a?(Vector)
+
+    row, col = vector.to_a
+
+    @grid[row][col]
   end
 
   def valid_position?(position)
@@ -41,6 +47,19 @@ class Board
     puts str
   end
 
+  def move_piece!(origin, destination)
+    return false unless self[origin].occupied?
+
+    movement = destination - origin
+    piece = self[origin].piece
+
+    return false unless valid_position?(destination) && piece.valid_move?(movement)
+
+    replaced = self[destination].replace!(piece)
+    self[origin].pop!
+    replaced.nil? ? true : replaced
+  end
+
   private
 
   def spawn_pieces
@@ -51,8 +70,7 @@ class Board
   end
 
   def spawn_piece(piece, position, color)
-    row, col = position
-    grid[row][col].replace! piece.new(self, Vector.new(position), color)
+    self[position].replace! piece.new(self, Vector.new(position), color)
   end
 
   def spawn_king_row(color)
@@ -77,6 +95,8 @@ end
 class Tile
   WHITE_EMPTY_SYMBOL = "\u2610"
   GRAY_EMPTY_SYMBOL = "\u2612"
+
+  attr_reader :piece
 
   def initialize(gray = false)
     @gray = gray

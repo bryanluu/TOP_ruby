@@ -9,9 +9,7 @@ class Piece
   attr_reader :position, :symbol, :color
   COLORS = %i[White Black].freeze
 
-  def initialize(board, position, color = :White)
-    @board = board
-    @position = position
+  def initialize(color = :White)
     @active = true
     @moveset = []
     @color = color
@@ -31,17 +29,17 @@ class Piece
     @active
   end
 
-  # returns false if destination cannot be reached, otherwise moves piece and returns true
-  def move_to!(destination)
-    return false unless active?
+  # # returns false if destination cannot be reached, otherwise moves piece and returns true
+  # def move_to!(destination)
+  #   return false unless active?
 
-    movement = destination - position
+  #   movement = destination - position
 
-    return false unless @board.valid_position?(destination) && valid_move?(movement)
+  #   return false unless valid_move?(movement)
 
-    @position = destination
-    true
-  end
+  #   @position = destination
+  #   true
+  # end
 
   # de-activates piece
   def kill!
@@ -71,8 +69,8 @@ end
 
 # Implements a King
 class King < Piece
-  def initialize(board, position, color)
-    super(board, position, color)
+  def initialize(color)
+    super(color)
     steps = [-1, 0, 1]
     moves = steps.product(steps) # the single steps around current position
     moves.delete([0, 0]) # delete current position
@@ -90,8 +88,8 @@ end
 
 # Implements a Queen
 class Queen < Piece
-  def initialize(board, position, color)
-    super(board, position, color)
+  def initialize(color)
+    super(color)
     steps = Array(1...Board::SIDE_LENGTH)
     steps = steps.reverse.map(&:-@) + steps
     horizontal = steps.map { |step| Vector.new([0, step]) }
@@ -112,8 +110,8 @@ end
 
 # Implements a Rook
 class Rook < Piece
-  def initialize(board, position, color)
-    super(board, position, color)
+  def initialize(color)
+    super(color)
     steps = Array(1...Board::SIDE_LENGTH)
     steps = steps.reverse.map(&:-@) + steps
     horizontal = steps.map { |step| Vector.new([0, step]) }
@@ -132,8 +130,8 @@ end
 
 # Implements a Bishop
 class Bishop < Piece
-  def initialize(board, position, color)
-    super(board, position, color)
+  def initialize(color)
+    super(color)
     steps = Array(1...Board::SIDE_LENGTH)
     steps = steps.reverse.map(&:-@) + steps
     diagonal = steps.map { |step| Vector.new([step, step]) }
@@ -152,8 +150,8 @@ end
 
 # Implements a Knight
 class Knight < Piece
-  def initialize(board, position, color)
-    super(board, position, color)
+  def initialize(color)
+    super(color)
     moves = [1, -1].product([2, -2])
     moves += moves.map(&:reverse)
     @moveset = moves.map { |move| Vector.new(move) }
@@ -170,8 +168,8 @@ end
 
 # Implements a Pawn
 class Pawn < Piece
-  def initialize(board, position, color)
-    super(board, position, color)
+  def initialize(color)
+    super(color)
     step = (white? ? -1 : 1)
     moves = [[step, 0], [step, 1], [step, -1], [2 * step, 0]]
     @moveset = moves.map { |move| Vector.new(move) }
@@ -186,14 +184,12 @@ class Pawn < Piece
     "\u265F"
   end
 
-  def move_to!(destination)
-    success = super(destination)
-    if success && @first_move
+  def move!
+    if @first_move
       @first_move = false
       step = (white? ? -1 : 1)
       @moveset.delete([2 * step, 0])
     end
-    success
   end
 end
 
