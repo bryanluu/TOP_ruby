@@ -21,11 +21,18 @@ class Board
     spawn_pieces
   end
 
-  def [](vector)
-    raise ArgumentError, 'Can only be indexed by Vectors' unless vector.is_a?(Vector)
+  def [](*args)
+    if args.length == 1
+      raise ArgumentError, 'Can only be single-indexed by Vectors' unless args[0].is_a?(Vector)
 
-    row, col = vector.to_a
+      row, col = args[0].to_a
+    elsif args.length == 2
+      raise ArgumentError, 'Can only be double-indexed by integers between 0-7' unless valid_position?(args)
 
+      row, col = args
+    else
+      raise ArgumentError, "Too many arguments given! Expected 2, got #{args.length}"
+    end
     @grid[row][col]
   end
 
@@ -55,9 +62,8 @@ class Board
 
     return false unless valid_position?(destination) && piece.valid_move?(movement)
 
-    replaced = self[destination].replace!(piece)
     self[origin].pop!
-    replaced.nil? ? true : replaced
+    self[destination].replace!(piece)
   end
 
   private
@@ -70,7 +76,8 @@ class Board
   end
 
   def spawn_piece(piece, position, color)
-    self[position].replace! piece.new(self, Vector.new(position), color)
+    p_vector = Vector.new(position)
+    self[p_vector].replace! piece.new(color)
   end
 
   def spawn_king_row(color)
