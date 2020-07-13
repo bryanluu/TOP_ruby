@@ -63,7 +63,8 @@ class Board
     return false unless valid_position?(destination) && piece.valid_move?(movement)
 
     self[origin].pop!
-    self[destination].replace!(piece)
+    replaced = self[destination].replace!(piece)
+    replaced.nil? ? true : replaced
   end
 
   private

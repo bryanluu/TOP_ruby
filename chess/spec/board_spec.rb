@@ -24,4 +24,24 @@ describe Board do
       expect(board.valid_position?([-1, -1])).to be(false)
     end
   end
+  describe '#move_piece!' do
+    it 'correctly returns false for moving an empty spot' do
+      board = Board.new
+      pos = Vector.new([3, 3])
+      dest = Vector.new([4, 3])
+      expect(board.move_piece!(pos, dest)).to be(false)
+    end
+    it 'correctly returns false for moving to an off-board spot' do
+      board = Board.new
+      pos = Vector.zero
+      dest = Vector.new([-1, -1])
+      expect(board.move_piece!(pos, dest)).to be(false)
+    end
+    it 'correctly returns true for moving to an empty spot' do
+      board = Board.new
+      pos = Vector.new([1, 0])
+      dest = Vector.new([2, 0])
+      expect(board.move_piece!(pos, dest)).to be(true)
+    end
+  end
 end
