@@ -27,6 +27,20 @@ class Vector
     Vector.new(result)
   end
 
+  def *(other)
+    raise TypeError, 'Must be multiplied by a scalar (number)!' unless other.is_a?(Numeric)
+
+    result = Array.new(ndim) { |i| @data[i] * other }
+    Vector.new(result)
+  end
+
+  def /(other)
+    raise TypeError, 'Must be divided by a scalar (number)!' unless other.is_a?(Numeric)
+
+    result = Array.new(ndim) { |i| @data[i] / other }
+    Vector.new(result)
+  end
+
   def ndim
     @data.length
   end

@@ -54,7 +54,7 @@ describe Vector do
       u = Vector.new(a)
       b = Array.new(dim) { 'abcdefghijklmnopqrstuvwxyz'.split('').sample }
       v = Vector.new(b)
-      expect{ u + v }.to raise_error(TypeError)
+      expect { u + v }.to raise_error(TypeError)
     end
     it 'complains when uneven vectors are added' do
       dim = rand(1..5)
@@ -62,7 +62,7 @@ describe Vector do
       u = Vector.new(a)
       b = Array.new(dim + 1) { rand(0..10) }
       v = Vector.new(b)
-      expect{ u + v }.to raise_error(TypeError)
+      expect { u + v }.to raise_error(TypeError)
     end
   end
   describe '#-' do
@@ -82,7 +82,7 @@ describe Vector do
       u = Vector.new(a)
       b = Array.new(dim) { 'abcdefghijklmnopqrstuvwxyz'.split('').sample }
       v = Vector.new(b)
-      expect{ u - v }.to raise_error(TypeError)
+      expect { u - v }.to raise_error(TypeError)
     end
     it 'complains when uneven vectors are subtracted' do
       dim = rand(1..5)
@@ -90,7 +90,27 @@ describe Vector do
       u = Vector.new(a)
       b = Array.new(dim + 1) { rand(0..10) }
       v = Vector.new(b)
-      expect{ u - v }.to raise_error(TypeError)
+      expect { u - v }.to raise_error(TypeError)
+    end
+  end
+  describe '#*' do
+    it 'multiplies by a scalar correctly' do
+      a = Vector.new(Array(1..3))
+      expect(a * 2).to eq([2, 4, 6])
+    end
+    it 'complains when multiplying by a string' do
+      a = Vector.new(Array(1..3))
+      expect { a * 'a' }.to raise_error(TypeError)
+    end
+  end
+  describe '#/' do
+    it 'divides by a scalar correctly' do
+      a = Vector.new([2, 4, 6])
+      expect(a / 2).to eq([1, 2, 3])
+    end
+    it 'complains when dividing by a string' do
+      a = Vector.new(Array(1..3))
+      expect { a / 'a' }.to raise_error(TypeError)
     end
   end
   describe '#ndim' do
