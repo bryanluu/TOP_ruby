@@ -56,15 +56,19 @@ class Board
 
   def move_piece!(origin, destination)
     return false unless self[origin].occupied?
+    return false unless valid_position?(destination) && valid_path?(origin, destination)
 
-    movement = destination - origin
-    piece = self[origin].piece
-
-    return false unless valid_position?(destination) && piece.valid_move?(movement)
-
-    self[origin].pop!
+    piece = self[origin].pop!
     replaced = self[destination].replace!(piece)
     replaced.nil? ? true : replaced
+  end
+
+  def valid_path?(origin, destination)
+    piece = self[origin].piece
+    return valid_knight_path?(piece, origin, destination) if piece.is_a? Knight
+    return valid_pawn_path?(piece, origin, destination) if piece.is_a? Pawn
+    
+    valid_general_path?(piece, origin, destination)
   end
 
   private
@@ -96,6 +100,38 @@ class Board
   def spawn_pawns(color)
     pawn_row = (color == :Black ? 1 : Board::SIDE_LENGTH - 2)
     (0...Board::SIDE_LENGTH).each { |col| spawn_piece(Pawn, [pawn_row, col], color) }
+  end
+
+  def valid_knight_path?(knight, origin, destination)
+    movement = destination - origin
+    food = self[destination].piece
+    knight.valid_move?(movement) && (food ? food.color != piece.color : true)
+  end
+
+  def valid_pawn_path?(pawn, origin, destination)
+    movement = destination - origin
+    food = self[destination].piece
+    step = (pawn.white? ? -1 : 1)
+    if [[step, 1], [step, -1]].include?(movement)
+      food && food.color != pawn.color
+    elsif movement == [2 * step, 0]
+      !self[origin + Vector.new([step, 0])].occupied? && food.nil?
+    else
+      movement == [step, 0] && food.nil?
+    end
+  end
+
+  def valid_general_path?(piece, origin, destination)
+    movement = destination - origin
+    return false unless piece.valid_move?(movement)
+
+    steps = movement.max
+    step = movement / steps
+    (1...steps).each do |i|
+      pos = origin + step * i
+      return false if self[pos].occupied?
+    end
+    !self[destination].occupied? || self[destination].piece.color != piece.color
   end
 end
 

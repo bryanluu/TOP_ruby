@@ -29,18 +29,6 @@ class Piece
     @active
   end
 
-  # # returns false if destination cannot be reached, otherwise moves piece and returns true
-  # def move_to!(destination)
-  #   return false unless active?
-
-  #   movement = destination - position
-
-  #   return false unless valid_move?(movement)
-
-  #   @position = destination
-  #   true
-  # end
-
   # de-activates piece
   def kill!
     @active = false
