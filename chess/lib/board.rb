@@ -23,7 +23,7 @@ class Board
 
   def [](*args)
     if args.length == 1
-      raise ArgumentError, 'Can only be single-indexed by Vectors' unless args[0].is_a?(Vector)
+      raise ArgumentError, 'Can only be single-indexed by Vectors' unless args[0].is_a?(Vector) || args[0].is_a?(Array)
 
       row, col = args[0].to_a
     elsif args.length == 2
@@ -67,7 +67,7 @@ class Board
     piece = self[origin].piece
     return valid_knight_path?(piece, origin, destination) if piece.is_a? Knight
     return valid_pawn_path?(piece, origin, destination) if piece.is_a? Pawn
-    
+
     valid_general_path?(piece, origin, destination)
   end
 
@@ -81,8 +81,7 @@ class Board
   end
 
   def spawn_piece(piece, position, color)
-    p_vector = Vector.new(position)
-    self[p_vector].replace! piece.new(color)
+    self[position].replace! piece.new(color)
   end
 
   def spawn_king_row(color)
