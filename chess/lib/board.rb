@@ -60,22 +60,15 @@ class Board
   # attempts to move the piece at origin to destination,
   # returns false if not possible, the replaced value or true otherwise
   def move_piece!(origin, destination)
+    origin = Vector.new(origin) unless origin.is_a? Vector
+    destination = Vector.new(destination) unless destination.is_a? Vector
     return false unless self[origin].occupied?
     return false unless valid_position?(destination) && valid_path?(origin, destination)
 
     piece = self[origin].pop!
+    piece.move! if piece.is_a? Pawn
     replaced = self[destination].replace!(piece)
     replaced.nil? ? true : replaced
-  end
-
-  # checks the path from origin to destination if it is valid for the piece at origin
-  def valid_path?(origin, destination)
-    piece = self[origin].piece
-    return false if piece.nil?
-    return valid_knight_path?(origin, destination) if piece.is_a? Knight
-    return valid_pawn_path?(origin, destination) if piece.is_a? Pawn
-
-    valid_general_path?(origin, destination)
   end
 
   private
@@ -112,6 +105,16 @@ class Board
     (0...Board::SIDE_LENGTH).each { |col| spawn_piece(Pawn, [pawn_row, col], color) }
   end
 
+  # checks the path from origin to destination if it is valid for the piece at origin
+  def valid_path?(origin, destination)
+    piece = self[origin].piece
+    return false if piece.nil?
+    return valid_knight_path?(origin, destination) if piece.is_a? Knight
+    return valid_pawn_path?(origin, destination) if piece.is_a? Pawn
+
+    valid_general_path?(origin, destination)
+  end
+
   # checks whether path is valid for knight
   def valid_knight_path?(origin, destination)
     movement = destination - origin
@@ -126,7 +129,7 @@ class Board
     pawn = self[origin].piece
     food = self[destination].piece
     step = (pawn.white? ? -1 : 1)
-    if [[step, 1], [step, -1]].include?(movement)
+    if [[step, 1], [step, -1]].include?(movement.to_a)
       food && food.color != pawn.color
     elsif movement == [2 * step, 0]
       !self[origin + Vector.new([step, 0])].occupied? && food.nil?
@@ -141,7 +144,7 @@ class Board
     piece = self[origin].piece
     return false unless piece.valid_move?(movement)
 
-    steps = movement.max
+    steps = movement.to_a.map(&:abs).max
     step = movement / steps
     (1...steps).each do |i|
       pos = origin + step * i
