@@ -14,13 +14,14 @@ class Board
   def initialize
     @grid = Array.new(8) do |row|
       Array.new(8) do |col|
-        gray = (row.even? ? col.even? : col.odd?)
+        gray = (row.even? ? col.even? : col.odd?) # every other tile is gray
         Tile.new(gray)
       end
     end
-    spawn_pieces
+    spawn_pieces # spawn Chess pieces
   end
 
+  # indexes into the grid of Tiles using either a vector or row and col
   def [](*args)
     if args.length == 1
       raise ArgumentError, 'Can only be single-indexed by Vectors' unless args[0].is_a?(Vector) || args[0].is_a?(Array)
@@ -36,11 +37,13 @@ class Board
     @grid[row][col]
   end
 
+  # returns whether the position (Vector) is on the board or not
   def valid_position?(position)
     row, col = position.to_a
     row.between?(0, Board::SIDE_LENGTH - 1) && col.between?(0, Board::SIDE_LENGTH - 1)
   end
 
+  # displays the Chessboard, with row and column names
   def display
     str = String.new
     @grid.each_with_index do |row, i|
@@ -54,6 +57,8 @@ class Board
     puts str
   end
 
+  # attempts to move the piece at origin to destination,
+  # returns false if not possible, the replaced value or true otherwise
   def move_piece!(origin, destination)
     return false unless self[origin].occupied?
     return false unless valid_position?(destination) && valid_path?(origin, destination)
@@ -63,16 +68,19 @@ class Board
     replaced.nil? ? true : replaced
   end
 
+  # checks the path from origin to destination if it is valid for the piece at origin
   def valid_path?(origin, destination)
     piece = self[origin].piece
-    return valid_knight_path?(piece, origin, destination) if piece.is_a? Knight
-    return valid_pawn_path?(piece, origin, destination) if piece.is_a? Pawn
+    return false if piece.nil?
+    return valid_knight_path?(origin, destination) if piece.is_a? Knight
+    return valid_pawn_path?(origin, destination) if piece.is_a? Pawn
 
-    valid_general_path?(piece, origin, destination)
+    valid_general_path?(origin, destination)
   end
 
   private
 
+  # spawn Chess pieces at default positions
   def spawn_pieces
     Piece::COLORS.each do |color|
       spawn_king_row(color)
@@ -80,10 +88,12 @@ class Board
     end
   end
 
+  # spawn given color piece at position
   def spawn_piece(piece, position, color)
     self[position].replace! piece.new(color)
   end
 
+  # spawn pieces on the King row with given color
   def spawn_king_row(color)
     king_row = (color == :Black ? 0 : Board::SIDE_LENGTH - 1)
     spawn_piece(Rook, [king_row, 0], color)
@@ -96,19 +106,24 @@ class Board
     spawn_piece(Rook, [king_row, 7], color)
   end
 
+  # spawn pawns with given color
   def spawn_pawns(color)
     pawn_row = (color == :Black ? 1 : Board::SIDE_LENGTH - 2)
     (0...Board::SIDE_LENGTH).each { |col| spawn_piece(Pawn, [pawn_row, col], color) }
   end
 
-  def valid_knight_path?(knight, origin, destination)
+  # checks whether path is valid for knight
+  def valid_knight_path?(origin, destination)
     movement = destination - origin
+    knight = self[origin].piece
     food = self[destination].piece
     knight.valid_move?(movement) && (food ? food.color != piece.color : true)
   end
 
-  def valid_pawn_path?(pawn, origin, destination)
+  # checks whether path is valid for pawn
+  def valid_pawn_path?(origin, destination)
     movement = destination - origin
+    pawn = self[origin].piece
     food = self[destination].piece
     step = (pawn.white? ? -1 : 1)
     if [[step, 1], [step, -1]].include?(movement)
@@ -120,8 +135,10 @@ class Board
     end
   end
 
-  def valid_general_path?(piece, origin, destination)
+  # checks whether path is valid for general piece
+  def valid_general_path?(origin, destination)
     movement = destination - origin
+    piece = self[origin].piece
     return false unless piece.valid_move?(movement)
 
     steps = movement.max
@@ -146,10 +163,12 @@ class Tile
     @piece = nil
   end
 
+  # whether the Tile is occupied
   def occupied?
     @piece != nil
   end
 
+  # shows the empty Tile symbol if empty, otherwise shows the piece symbol
   def to_s
     empty_symbol = (@gray ? Tile::GRAY_EMPTY_SYMBOL : Tile::WHITE_EMPTY_SYMBOL)
     occupied? ? @piece.symbol : empty_symbol
