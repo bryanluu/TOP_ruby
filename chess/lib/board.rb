@@ -18,6 +18,7 @@ class Board
         Tile.new(gray)
       end
     end
+    @graveyard = { White: [], Black: [] }.freeze
     spawn_pieces # spawn Chess pieces
   end
 
@@ -46,19 +47,21 @@ class Board
   # displays the Chessboard, with row and column names
   def display
     str = String.new
+    str << dead_pieces_str(:White)
     @grid.each_with_index do |row, i|
-      str << "#{Board::SIDE_LENGTH - i} "
-      str << row.map(&:to_s).join(' ')
+      str << "#{Board::SIDE_LENGTH - i} " # print current row number
+      str << row.map(&:to_s).join(' ') # print row of tiles
       str << "\n"
     end
     str << '  '
-    str << %i[a b c d e f g h].map(&:to_s).join(' ')
+    str << %i[a b c d e f g h].map(&:to_s).join(' ') # print columns
     str << "\n"
+    str << dead_pieces_str(:Black)
     puts str
   end
 
   # attempts to move the piece at origin to destination,
-  # returns false if not possible, the replaced value or true otherwise
+  # returns false if not possible, otherwise moves the piece and returns true
   def move_piece!(origin, destination)
     origin = Vector.new(origin) unless origin.is_a? Vector
     destination = Vector.new(destination) unless destination.is_a? Vector
@@ -68,7 +71,8 @@ class Board
     piece = self[origin].pop!
     piece.move! if piece.is_a? Pawn
     replaced = self[destination].replace!(piece)
-    replaced.nil? ? true : replaced
+    @graveyard[replaced.color] << replaced unless replaced.nil? # add the dead piece to the graveyard
+    true
   end
 
   private
@@ -151,6 +155,11 @@ class Board
       return false if self[pos].occupied?
     end
     !self[destination].occupied? || self[destination].piece.color != piece.color
+  end
+
+  # returns the dead pieces of the given color as a string if there are dead-pieces, otherwise blank string
+  def dead_pieces_str(color)
+    @graveyard[color].empty? ? String.new : "#{Piece::TEAM_ICONS[Piece.opposite(color)]}: #{@graveyard[color].map(&:symbol).join}\n"
   end
 end
 

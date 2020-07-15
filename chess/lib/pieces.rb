@@ -8,6 +8,7 @@ require 'pry'
 class Piece
   attr_reader :position, :symbol, :color
   COLORS = %i[White Black].freeze
+  TEAM_ICONS = { White: "\u2690", Black: "\u2691" }.freeze
 
   def initialize(color = :White)
     @active = true
@@ -52,6 +53,11 @@ class Piece
   # whether the piece is black
   def black?
     color == :Black
+  end
+
+  # the opposite team's color
+  def self.opposite(color)
+    Piece::COLORS[(Piece::COLORS.index(color) + 1) % 2]
   end
 end
 
