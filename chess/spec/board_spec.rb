@@ -59,7 +59,6 @@ describe Board do
       board = Board.new
       board.move_piece!([1, 4], [2, 4]) # move pawn out of the way
       board.move_piece!([0, 5], [4, 1]) # move bishop to the middle-field
-      pawn = board[6, 3].piece # the target pawn
       expect(board.move_piece!([4, 1], [6, 3])).to be(true)
     end
     it 'correctly returns false for a Pawn trying to eat an enemy in front' do
@@ -74,7 +73,6 @@ describe Board do
       board.move_piece!([1, 0], [3, 0]) # move pawn forward
       board.move_piece!([3, 0], [4, 0])
       board.move_piece!([4, 0], [5, 0])
-      pawn = board[6, 1].piece
       expect(board.move_piece!([5, 0], [6, 1])).to be(true)
     end
   end
