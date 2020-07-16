@@ -25,7 +25,9 @@ class Board
   # indexes into the grid of Tiles using either a vector or row and col
   def [](*args)
     if args.length == 1
-      raise ArgumentError, 'Can only be single-indexed by Vectors' unless args[0].is_a?(Vector) || args[0].is_a?(Array)
+      unless (args[0].is_a?(Vector) || args[0].is_a?(Array)) && valid_position?(args[0])
+        raise ArgumentError, 'Can only be single-indexed by valid on-board Vectors'
+      end
 
       row, col = args[0].to_a
     elsif args.length == 2
@@ -160,6 +162,55 @@ class Board
   # returns the dead pieces of the given color as a string if there are dead-pieces, otherwise blank string
   def dead_pieces_str(color)
     @graveyard[color].empty? ? String.new : "#{Piece::TEAM_ICONS[Piece.opposite(color)]}: #{@graveyard[color].map(&:symbol).join}\n"
+  end
+
+  # returns a list of the enemies attacking location
+  def enemies_attacking(location)
+    location = Vector.new(location) if location.is_a? Array
+    color = self[location].piece.color
+    # add any enemy knights to the list
+    enemies = knight_spots_surrounding(location).filter do |spot|
+      valid_position?(spot) && self[spot].piece.is_a?(Knight) && self[spot].piece.color != color
+    end
+    # add general enemies attack location
+    tree = immediate_spots_surrounding(location)
+    tree.filter! { |spot| valid_position?(spot) } # filter out only spots on board
+    tree.each do |spot|
+      if self[spot].occupied? # if the spot has an enemy piece, add it and continue
+        enemies += enemy_on(spot, location)
+        next
+      end
+      # otherwise
+      diff = spot - location # the direction of the next spot
+      step = diff.to_a.map(&:abs).max # the magnitude of diff
+      next_spot = spot + diff / step # take a single-sized step toward the next spot
+      tree << next_spot if valid_position?(next_spot) # only add children if on board
+    end
+    enemies
+  end
+
+  # return the 8 immediate surrounding spots around location
+  def immediate_spots_surrounding(location)
+    step = [-1, 0, 1]
+    moves = step.product(step).reject { |move| move == [0, 0] }
+    moves.map { |move| location + Vector.new(move) }
+  end
+
+  # return the 8 knight-spots around location
+  def knight_spots_surrounding(location)
+    moves = [1, -1].product([2, -2])
+    moves += moves.map(&:reverse)
+    moves.map { |move| location + Vector.new(move) }
+  end
+
+  # returns the spot occupied by a general (non-Knight) enemy or a Pawn
+  def enemy_on(spot, location)
+    if self[spot].piece.is_a? Pawn
+      return [spot] if valid_pawn_path?(spot, location)
+    else
+      return [spot] if valid_general_path?(spot, location)
+    end
+    []
   end
 end
 
