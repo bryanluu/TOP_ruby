@@ -164,6 +164,11 @@ class Board
     @graveyard[color].empty? ? String.new : "#{Piece::TEAM_ICONS[Piece.opposite(color)]}: #{@graveyard[color].map(&:symbol).join}\n"
   end
 
+  # returns whether the piece at location is in danger
+  def piece_in_danger?(location)
+    !enemies_attacking(location).empty?
+  end
+
   # returns a list of the enemies attacking location
   def enemies_attacking(location)
     location = Vector.new(location) if location.is_a? Array
@@ -172,7 +177,7 @@ class Board
     enemies = knight_spots_surrounding(location).filter do |spot|
       valid_position?(spot) && self[spot].piece.is_a?(Knight) && self[spot].piece.color != color
     end
-    # add general enemies attack location
+    # add general enemies attacking location
     tree = immediate_spots_surrounding(location)
     tree.filter! { |spot| valid_position?(spot) } # filter out only spots on board
     tree.each do |spot|
