@@ -130,10 +130,9 @@ class Board
   end
 
   # checks whether path is valid for pawn
-  def valid_pawn_path?(origin, destination)
+  def valid_pawn_path?(origin, destination, food = self[destination].piece)
     movement = destination - origin
     pawn = self[origin].piece
-    food = self[destination].piece
     step = (pawn.white? ? -1 : 1)
     if [[step, 1], [step, -1]].include?(movement.to_a)
       food && food.color != pawn.color
@@ -145,7 +144,7 @@ class Board
   end
 
   # checks whether path is valid for general piece
-  def valid_general_path?(origin, destination)
+  def valid_general_path?(origin, destination, food = self[destination].piece)
     movement = destination - origin
     piece = self[origin].piece
     return false unless piece.valid_move?(movement)
@@ -156,23 +155,29 @@ class Board
       pos = origin + step * i
       return false if self[pos].occupied?
     end
-    !self[destination].occupied? || self[destination].piece.color != piece.color
+    !self[destination].occupied? || \
+      (self[destination].occupied? && food == self[destination].piece && food.color != piece.color)
   end
 
   # returns the dead pieces of the given color as a string if there are dead-pieces, otherwise blank string
   def dead_pieces_str(color)
-    @graveyard[color].empty? ? String.new : "#{Piece::TEAM_ICONS[Piece.opposite(color)]}: #{@graveyard[color].map(&:symbol).join}\n"
+    if @graveyard[color].empty?
+      String.new
+    else
+      "#{Piece::TEAM_ICONS[Piece.opposite(color)]}: #{@graveyard[color].map(&:symbol).join}\n"
+    end
   end
 
-  # returns whether the piece at location is in danger
-  def piece_in_danger?(location)
-    !enemies_attacking(location).empty?
+  # returns whether the location is in danger of being attacked
+  def spot_in_danger?(location, reference = location)
+    ref_piece = self[reference].piece
+    !enemies_attacking(location, ref_piece).empty?
   end
 
   # returns a list of the enemies attacking location
-  def enemies_attacking(location)
+  def enemies_attacking(location, piece = self[location].piece)
     location = Vector.new(location) if location.is_a? Array
-    color = self[location].piece.color
+    piece.color
     # add any enemy knights to the list
     enemies = knight_spots_surrounding(location).filter do |spot|
       valid_position?(spot) && self[spot].piece.is_a?(Knight) && self[spot].piece.color != color
@@ -182,7 +187,7 @@ class Board
     tree.filter! { |spot| valid_position?(spot) } # filter out only spots on board
     tree.each do |spot|
       if self[spot].occupied? # if the spot has an enemy piece, add it and continue
-        enemies += enemy_on(spot, location)
+        enemies += enemy_on(spot, location, piece)
         next
       end
       # otherwise
@@ -209,11 +214,11 @@ class Board
   end
 
   # returns the spot occupied by a general (non-Knight) enemy or a Pawn
-  def enemy_on(spot, location)
+  def enemy_on(spot, location, piece = self[location].piece)
     if self[spot].piece.is_a? Pawn
-      return [spot] if valid_pawn_path?(spot, location)
+      return [spot] if valid_pawn_path?(spot, location, piece)
     else
-      return [spot] if valid_general_path?(spot, location)
+      return [spot] if valid_general_path?(spot, location, piece)
     end
     []
   end
