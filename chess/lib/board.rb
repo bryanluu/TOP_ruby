@@ -75,7 +75,7 @@ class Board
     return false unless valid_position?(destination) && valid_path?(origin, destination)
 
     piece = self[origin].pop!
-    piece.move! if piece.is_a? Pawn
+    piece.move!
     replaced = self[destination].replace!(piece)
     @graveyard[replaced.color] << replaced unless replaced.nil? # add the dead piece to the graveyard
     true

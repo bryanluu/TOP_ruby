@@ -17,6 +17,9 @@ class Piece
     @symbol = (color == :White ? white_symbol : black_symbol)
   end
 
+  # do nothing by default
+  def move!; end
+
   def white_symbol
     nil
   end
@@ -63,12 +66,19 @@ end
 
 # Implements a King
 class King < Piece
+  attr_reader :moved
+
   def initialize(color)
     super(color)
     steps = [-1, 0, 1]
     moves = steps.product(steps) # the single steps around current position
     moves.delete([0, 0]) # delete current position
     @moveset = moves.map { |move| Vector.new(move) } # convert moves into Vectors
+    @moved = false
+  end
+
+  def move!
+    @moved = true
   end
 
   def white_symbol
@@ -104,6 +114,8 @@ end
 
 # Implements a Rook
 class Rook < Piece
+  attr_reader :moved
+
   def initialize(color)
     super(color)
     steps = Array(1...Board::SIDE_LENGTH)
@@ -111,6 +123,11 @@ class Rook < Piece
     horizontal = steps.map { |step| Vector.new([0, step]) }
     vertical = steps.map { |step| Vector.new([step, 0]) }
     @moveset = horizontal + vertical
+    @moved = false
+  end
+
+  def move!
+    @moved = true
   end
 
   def white_symbol
