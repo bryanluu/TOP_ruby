@@ -50,9 +50,13 @@ class Board
   def display
     str = String.new
     str << dead_pieces_str(:White)
+    str << '  '
+    str << %i[a b c d e f g h].map(&:to_s).join(' ') # print columns
+    str << "\n"
     @grid.each_with_index do |row, i|
       str << "#{Board::SIDE_LENGTH - i} " # print current row number
       str << row.map(&:to_s).join(' ') # print row of tiles
+      str << " #{Board::SIDE_LENGTH - i}" # print current row number
       str << "\n"
     end
     str << '  '
@@ -226,8 +230,8 @@ end
 
 # Implements a Chessboard Tile
 class Tile
-  WHITE_EMPTY_SYMBOL = "\u2610"
-  GRAY_EMPTY_SYMBOL = "\u2612"
+  WHITE_EMPTY_SYMBOL = '.'
+  GRAY_EMPTY_SYMBOL = '.'
 
   attr_reader :piece
 
