@@ -74,11 +74,16 @@ class King < Piece
     moves = steps.product(steps) # the single steps around current position
     moves.delete([0, 0]) # delete current position
     @moveset = moves.map { |move| Vector.new(move) } # convert moves into Vectors
+    @moveset << Vector.new([0, 2]) << Vector.new([0, -2]) # add castling moves
     @moved = false
   end
 
   def move!
-    @moved = true
+    unless @moved
+      @moveset.delete(Vector.new([0, -2]))
+      @moveset.delete(Vector.new([0, 2]))
+      @moved = true
+    end
   end
 
   def white_symbol

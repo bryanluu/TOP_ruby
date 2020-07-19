@@ -75,5 +75,34 @@ describe Board do
       board.move_piece!([4, 0], [5, 0])
       expect(board.move_piece!([5, 0], [6, 1])).to be(true)
     end
+    it 'correctly returns false when an invalid castling maneuver is attempted off-the-bat' do
+      board = Board.new
+      expect(board.move_piece!([0, 4], [0, 6])).to be(false)
+    end
+    it 'correctly returns false when an invalid castling maneuver after King is moved is attempted' do
+      board = Board.new
+      board.move_piece!([0, 6], [2, 7]) # move knight out of way
+      board.move_piece!([1, 4], [3, 4]) # move pawn forward
+      board.move_piece!([0, 5], [1, 4]) # move bishop out of way
+      board.move_piece!([0, 4], [0, 5]) # move king
+      board.move_piece!([0, 5], [0, 4]) # move king back
+      expect(board.move_piece!([0, 4], [0, 6])).to be(false)
+    end
+    it 'correctly returns true when a legal castling maneuver is attempted' do
+      board = Board.new
+      board.move_piece!([0, 6], [2, 7]) # move knight out of way
+      board.move_piece!([1, 4], [3, 4]) # move pawn forward
+      board.move_piece!([0, 5], [1, 4]) # move bishop out of way
+      expect(board.move_piece!([0, 4], [0, 6])).to be(true)
+    end
+
+    it 'correctly moves the King and Rook when a legal castling maneuver is attempted' do
+      board = Board.new
+      board.move_piece!([0, 6], [2, 7]) # move knight out of way
+      board.move_piece!([1, 4], [3, 4]) # move pawn forward
+      board.move_piece!([0, 5], [1, 4]) # move bishop out of way
+      board.move_piece!([0, 4], [0, 6]) # castling maneuver
+      expect(board[0, 6].piece.is_a?(King) && board[0, 5].piece.is_a?(Rook)).to be(true)
+    end
   end
 end

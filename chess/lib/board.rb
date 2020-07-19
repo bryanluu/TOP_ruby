@@ -74,8 +74,14 @@ class Board
     return false unless self[origin].occupied?
     return false unless valid_position?(destination) && valid_path?(origin, destination)
 
-    piece = self[origin].pop!
-    piece.move!
+    piece = self[origin].piece
+    movement = destination - origin
+    if castling_attempted?(piece, movement)
+      return false unless castling_allowed?(origin, movement)
+
+      castle_rook(origin, movement)
+    end
+    self[origin].pop!.move!
     replaced = self[destination].replace!(piece)
     @graveyard[replaced.color] << replaced unless replaced.nil? # add the dead piece to the graveyard
     true
@@ -181,7 +187,7 @@ class Board
   # returns a list of the enemies attacking location
   def enemies_attacking(location, piece = self[location].piece)
     location = Vector.new(location) if location.is_a? Array
-    piece.color
+    color = piece.color
     # add any enemy knights to the list
     enemies = knight_spots_surrounding(location).filter do |spot|
       valid_position?(spot) && self[spot].piece.is_a?(Knight) && self[spot].piece.color != color
@@ -225,6 +231,38 @@ class Board
       return [spot] if valid_general_path?(spot, location, piece)
     end
     []
+  end
+
+  # is a castling move being attempted?
+  def castling_attempted?(king, movement)
+    king.is_a?(King) && (movement == [0, 2] || movement == [0, -2])
+  end
+
+  # is castling allowed?
+  def castling_allowed?(king_location, movement)
+    king_row, king_col = king_location.to_a
+    right = (movement == [0, 2])
+    rook_col = (right ? Board::SIDE_LENGTH - 1 : 0)
+    king = self[king_location].piece
+    rook = self[king_row, rook_col].piece
+    return false if !king.is_a?(King) || king.moved || !rook.is_a?(Rook) || rook.moved
+
+    col_range = (right ? ((king_col + 1)...rook_col) : ((rook_col + 1)...king_col))
+    # check if there is a clear path
+    return false unless @grid[king_row][col_range].none?(&:occupied?)
+
+    # check that no spot is in danger
+    col_range.map { |col| spot_in_danger?(Vector.new([king_row, col]), king_location) }
+  end
+
+  # move rook in castling maneuver
+  def castle_rook(king_location, movement)
+    king_row, king_col = king_location.to_a
+    right = (movement == [0, 2])
+    rook_col = (right ? Board::SIDE_LENGTH - 1 : 0)
+    rook = self[king_row, rook_col].piece
+    self[king_row, rook_col].pop!.move!
+    self[king_row, king_col + (right ? 1 : -1)].replace!(rook) # move rook to the space next to castled King
   end
 end
 
