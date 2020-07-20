@@ -95,14 +95,39 @@ describe Board do
       board.move_piece!([0, 5], [1, 4]) # move bishop out of way
       expect(board.move_piece!([0, 4], [0, 6])).to be(true)
     end
-
-    it 'correctly moves the King and Rook when a legal castling maneuver is attempted' do
+    it 'correctly moves the (NE) King and Rook when a legal castling maneuver is attempted' do
       board = Board.new
       board.move_piece!([0, 6], [2, 7]) # move knight out of way
       board.move_piece!([1, 4], [3, 4]) # move pawn forward
       board.move_piece!([0, 5], [1, 4]) # move bishop out of way
       board.move_piece!([0, 4], [0, 6]) # castling maneuver
       expect(board[0, 6].piece.is_a?(King) && board[0, 5].piece.is_a?(Rook)).to be(true)
+    end
+    it 'correctly moves the (NW) King and Rook when a legal castling maneuver is attempted' do
+      board = Board.new
+      board.move_piece!([0, 1], [2, 0]) # move knight out of way
+      board.move_piece!([1, 3], [3, 3]) # move pawn forward
+      board.move_piece!([0, 2], [2, 4]) # move bishop out of way
+      board.move_piece!([0, 3], [1, 3]) # move queen out of way
+      board.move_piece!([0, 4], [0, 2]) # castling maneuver
+      expect(board[0, 2].piece.is_a?(King) && board[0, 3].piece.is_a?(Rook)).to be(true)
+    end
+    it 'correctly moves the (SE) King and Rook when a legal castling maneuver is attempted' do
+      board = Board.new
+      board.move_piece!([7, 6], [5, 7]) # move knight out of way
+      board.move_piece!([6, 4], [4, 4]) # move pawn forward
+      board.move_piece!([7, 5], [6, 4]) # move bishop out of way
+      board.move_piece!([7, 4], [7, 6]) # castling maneuver
+      expect(board[7, 6].piece.is_a?(King) && board[7, 5].piece.is_a?(Rook)).to be(true)
+    end
+    it 'correctly moves the (SW) King and Rook when a legal castling maneuver is attempted' do
+      board = Board.new
+      board.move_piece!([7, 1], [5, 0]) # move knight out of way
+      board.move_piece!([6, 3], [4, 3]) # move pawn forward
+      board.move_piece!([7, 2], [5, 4]) # move bishop out of way
+      board.move_piece!([7, 3], [6, 3]) # move queen out of way
+      board.move_piece!([7, 4], [7, 2]) # castling maneuver
+      expect(board[7, 2].piece.is_a?(King) && board[7, 3].piece.is_a?(Rook)).to be(true)
     end
   end
 end
