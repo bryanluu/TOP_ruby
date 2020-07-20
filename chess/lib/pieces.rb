@@ -38,11 +38,6 @@ class Piece
     @active = false
   end
 
-  # creates a string representation
-  def to_s
-    symbol.to_s + (active? ? "@#{position}" : '')
-  end
-
   # checks whether the move is valid for the piece
   def valid_move?(movement)
     @moveset.empty? || @moveset.include?(movement)

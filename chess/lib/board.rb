@@ -3,19 +3,25 @@
 # Implements a Chessboard
 class Board
   SIDE_LENGTH = 8
-  ROWS = {}
-  COLUMNS = {}
-  (1..SIDE_LENGTH).each { |row| ROWS[row] = SIDE_LENGTH - row }
-  %i[a b c d e f g h].each_with_index { |col, i| COLUMNS[col] = i }
+  ROW_TO_INDEX = {}
+  COLUMN_TO_INDEX = {}
+  (1..SIDE_LENGTH).each { |row| ROW_TO_INDEX[row] = SIDE_LENGTH - row }
+  %i[a b c d e f g h].each_with_index { |col, i| COLUMN_TO_INDEX[col] = i }
+  INDEX_TO_ROW = {}
+  INDEX_TO_COL = {}
+  (0...SIDE_LENGTH).each { |row| INDEX_TO_ROW[row] = SIDE_LENGTH - row }
+  %i[a b c d e f g h].each_with_index { |col, i| INDEX_TO_COL[i] = col }
   SIDE_LENGTH.freeze
-  ROWS.freeze
-  COLUMNS.freeze
+  ROW_TO_INDEX.freeze
+  COLUMN_TO_INDEX.freeze
+  INDEX_TO_ROW.freeze
+  INDEX_TO_COL.freeze
 
   def initialize
     @grid = Array.new(8) do |row|
       Array.new(8) do |col|
         gray = (row.even? ? col.even? : col.odd?) # every other tile is gray
-        Tile.new(gray)
+        Tile.new(Board::INDEX_TO_ROW[row], Board::INDEX_TO_COL[col], gray)
       end
     end
     @graveyard = { White: [], Black: [] }.freeze
@@ -51,16 +57,16 @@ class Board
     str = String.new
     str << dead_pieces_str(:White)
     str << '  '
-    str << %i[a b c d e f g h].map(&:to_s).join(' ') # print columns
+    str << Board::COLUMN_TO_INDEX.keys.map(&:to_s).join(' ') # print columns
     str << "\n"
     @grid.each_with_index do |row, i|
       str << "#{Board::SIDE_LENGTH - i} " # print current row number
-      str << row.map(&:to_s).join(' ') # print row of tiles
+      str << row.map(&:display).join(' ') # print row of tiles
       str << " #{Board::SIDE_LENGTH - i}" # print current row number
       str << "\n"
     end
     str << '  '
-    str << %i[a b c d e f g h].map(&:to_s).join(' ') # print columns
+    str << Board::COLUMN_TO_INDEX.keys.map(&:to_s).join(' ') # print columns
     str << "\n"
     str << dead_pieces_str(:Black)
     puts str
@@ -273,9 +279,11 @@ class Tile
 
   attr_reader :piece
 
-  def initialize(gray = false)
+  def initialize(row, col, gray = false)
     @gray = gray
     @piece = nil
+    @row = row
+    @col = col
   end
 
   # whether the Tile is occupied
@@ -284,9 +292,16 @@ class Tile
   end
 
   # shows the empty Tile symbol if empty, otherwise shows the piece symbol
-  def to_s
+  def display
     empty_symbol = (@gray ? Tile::GRAY_EMPTY_SYMBOL : Tile::WHITE_EMPTY_SYMBOL)
     occupied? ? @piece.symbol : empty_symbol
+  end
+
+  # shows a string representing the piece and the coordinate
+  def to_s
+    str = String.new
+    str << "#{@piece.symbol}" if occupied?
+    str << "#{@col}#{@row}"
   end
 
   # returns the piece and sets the Tile piece to nil
