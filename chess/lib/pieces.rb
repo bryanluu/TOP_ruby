@@ -184,12 +184,14 @@ end
 
 # Implements a Pawn
 class Pawn < Piece
+  attr_reader :moved
+
   def initialize(color)
     super(color)
     step = (white? ? -1 : 1)
     moves = [[step, 0], [step, 1], [step, -1], [2 * step, 0]]
     @moveset = moves.map { |move| Vector.new(move) }
-    @first_move = true
+    @moved = false
   end
 
   def white_symbol
@@ -201,11 +203,11 @@ class Pawn < Piece
   end
 
   def move!
-    if @first_move
-      @first_move = false
-      step = (white? ? -1 : 1)
-      @moveset.delete([2 * step, 0])
-    end
+    return if @moved
+
+    @moved = true
+    step = (white? ? -1 : 1)
+    @moveset.delete([2 * step, 0])
   end
 end
 
