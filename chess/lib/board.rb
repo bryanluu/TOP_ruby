@@ -26,6 +26,7 @@ class Board
     end
     @graveyard = { White: [], Black: [] }.freeze
     spawn_pieces # spawn Chess pieces
+    @last_move = nil
   end
 
   # indexes into the grid of Tiles using either a vector or row and col
@@ -69,6 +70,7 @@ class Board
     str << Board::COLUMN_TO_INDEX.keys.map(&:to_s).join(' ') # print columns
     str << "\n"
     str << dead_pieces_str(:Black)
+    str << "Last move: #{@last_move}\n" unless @last_move.nil?
     puts str
   end
 
@@ -87,6 +89,7 @@ class Board
 
       castle_rook(origin, movement)
     end
+    update_last_move(origin, destination)
     self[origin].pop!.move!
     replaced = self[destination].replace!(piece)
     @graveyard[replaced.color] << replaced unless replaced.nil? # add the dead piece to the graveyard
@@ -266,9 +269,17 @@ class Board
     king_row, king_col = king_location.to_a
     right = (movement == [0, 2])
     rook_col = (right ? Board::SIDE_LENGTH - 1 : 0)
+    # add rook movement to last move
+    @last_move = "#{self[king_row, rook_col]} to #{self[king_row, king_col + (right ? 1 : -1)]}, "
     rook = self[king_row, rook_col].piece
     self[king_row, rook_col].pop!.move!
     self[king_row, king_col + (right ? 1 : -1)].replace!(rook) # move rook to the space next to castled King
+  end
+
+  # updates the last move recorded with a move from origin to destination
+  def update_last_move(origin, destination)
+    @last_move = String.new unless !@last_move.nil? && @last_move.end_with?(', ') # if a castling move was made
+    @last_move += "#{self[origin]} to #{self[destination]}"
   end
 end
 
