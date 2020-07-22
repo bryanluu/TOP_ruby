@@ -32,13 +32,15 @@ class Board
   # indexes into the grid of Tiles using either a vector or row and col
   def [](*args)
     if args.length == 1
-      unless (args[0].is_a?(Vector) || args[0].is_a?(Array)) && valid_position?(args[0])
+      location = args[0]
+      location = Board.location_vector(location) if location.is_a? String
+      unless (location.is_a?(Vector) || location.is_a?(Array)) && Board.valid_position?(location)
         raise ArgumentError, 'Can only be single-indexed by valid on-board Vectors'
       end
 
-      row, col = args[0].to_a
+      row, col = location.to_a
     elsif args.length == 2
-      raise ArgumentError, 'Can only be double-indexed by integers between 0-7' unless valid_position?(args)
+      raise ArgumentError, 'Can only be double-indexed by integers between 0-7' unless Board.valid_position?(args)
 
       row, col = args
     else
@@ -48,8 +50,10 @@ class Board
   end
 
   # returns whether the position (Vector) is on the board or not
-  def valid_position?(position)
+  def self.valid_position?(position)
     row, col = position.to_a
+    return false if row.nil? || col.nil?
+
     row.between?(0, Board::SIDE_LENGTH - 1) && col.between?(0, Board::SIDE_LENGTH - 1)
   end
 
@@ -80,7 +84,7 @@ class Board
     origin = Vector.new(origin) unless origin.is_a? Vector
     destination = Vector.new(destination) unless destination.is_a? Vector
     return false unless self[origin].occupied?
-    return false unless valid_position?(destination) && valid_path?(origin, destination)
+    return false unless Board.valid_position?(destination) && valid_path?(origin, destination)
 
     piece = self[origin].piece
     movement = destination - origin
@@ -94,6 +98,17 @@ class Board
     replaced = self[destination].replace!(piece)
     @graveyard[replaced.color] << replaced unless replaced.nil? # add the dead piece to the graveyard
     true
+  end
+
+  # return the location vector associated with the Chess coordinate string
+  def self.location_vector(coordinate)
+    col, row = coordinate.split('')
+    col = col.to_sym
+    row = row.to_i
+    array = [ROW_TO_INDEX[row], COLUMN_TO_INDEX[col]]
+    raise KeyError, 'Invalid Chess co-ordinate!' unless Board.valid_position?(array)
+
+    Vector.new(array)
   end
 
   private
@@ -199,11 +214,11 @@ class Board
     color = piece.color
     # add any enemy knights to the list
     enemies = knight_spots_surrounding(location).filter do |spot|
-      valid_position?(spot) && self[spot].piece.is_a?(Knight) && self[spot].piece.color != color
+      Board.valid_position?(spot) && self[spot].piece.is_a?(Knight) && self[spot].piece.color != color
     end
     # add general enemies attacking location
     tree = immediate_spots_surrounding(location)
-    tree.filter! { |spot| valid_position?(spot) } # filter out only spots on board
+    tree.filter! { |spot| Board.valid_position?(spot) } # filter out only spots on board
     tree.each do |spot|
       if self[spot].occupied? # if the spot has an enemy piece, add it and continue
         enemies += enemy_on(spot, location, piece)
@@ -213,7 +228,7 @@ class Board
       diff = spot - location # the direction of the next spot
       step = diff.to_a.map(&:abs).max # the magnitude of diff
       next_spot = spot + diff / step # take a single-sized step toward the next spot
-      tree << next_spot if valid_position?(next_spot) # only add children if on board
+      tree << next_spot if Board.valid_position?(next_spot) # only add children if on board
     end
     enemies
   end

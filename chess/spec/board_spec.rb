@@ -12,16 +12,18 @@ describe Board do
       board = Board.new
       expect(board[Vector.zero].piece.symbol).to eq("\u265C")
     end
+    it 'correctly returns the Tile at the Chess coordinate' do
+      board = Board.new
+      expect(board['a1']).to be(board[7, 0])
+    end
   end
   describe '#valid_position?' do
     it 'correctly returns true for a valid space on board' do
-      board = Board.new
       position = Vector.new(Array.new(2) { rand(0...Board::SIDE_LENGTH) })
-      expect(board.valid_position?(position)).to be(true)
+      expect(Board.valid_position?(position)).to be(true)
     end
     it 'correctly returns false for a space off the board' do
-      board = Board.new
-      expect(board.valid_position?([-1, -1])).to be(false)
+      expect(Board.valid_position?([-1, -1])).to be(false)
     end
   end
   describe '#move_piece!' do
@@ -128,6 +130,15 @@ describe Board do
       board.move_piece!([7, 3], [6, 3]) # move queen out of way
       board.move_piece!([7, 4], [7, 2]) # castling maneuver
       expect(board[7, 2].piece.is_a?(King) && board[7, 3].piece.is_a?(Rook)).to be(true)
+    end
+  end
+  describe '#location_vector' do
+    it 'correctly converts Chess coord to location vector' do
+      expect(Board.location_vector('a8').to_a).to eq([0, 0])
+    end
+    it 'correctly throws error for invalid coord' do
+      puts Board::COLUMN_TO_INDEX[9]
+      expect{Board.location_vector('a9')}.to raise_error(KeyError)
     end
   end
 end
