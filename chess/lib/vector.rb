@@ -53,6 +53,10 @@ class Vector
     @data[0..-1]
   end
 
+  def copy
+    Vector.new(@data)
+  end
+
   def inspect
     "\#<#{ndim}-dim. Vector: " + @data.inspect + '>'
   end
