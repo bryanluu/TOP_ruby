@@ -88,6 +88,7 @@ class Board
 
     piece = self[origin].piece
     movement = destination - origin
+    execute_enpassant(origin, movement) if enpassant_attempted?(origin, movement)
     if castling_attempted?(piece, movement)
       return false unless castling_allowed?(origin, movement)
 
@@ -106,9 +107,18 @@ class Board
     col = col.to_sym
     row = row.to_i
     array = [ROW_TO_INDEX[row], COLUMN_TO_INDEX[col]]
-    raise KeyError, 'Invalid Chess co-ordinate!' unless Board.valid_position?(array)
+    raise KeyError, 'Invalid Chess co-ordinate!' unless Board.valid_coordinate?(coordinate)
 
     Vector.new(array)
+  end
+
+  # whether the Chess coordinate is valid
+  def self.valid_coordinate?(coordinate)
+    col, row = coordinate.split('')
+    col = col.to_sym
+    row = row.to_i
+    array = [ROW_TO_INDEX[row], COLUMN_TO_INDEX[col]]
+    array.none?(&:nil?)
   end
 
   private
@@ -169,7 +179,11 @@ class Board
     pawn = self[origin].piece
     step = (pawn.white? ? -1 : 1)
     if [[step, 1], [step, -1]].include?(movement.to_a)
-      food && food.color != pawn.color
+      if enpassant_attempted?(origin, movement)
+        enpassant_allowed?(origin, movement)
+      else
+        food && food.color != pawn.color
+      end
     elsif movement == [2 * step, 0]
       !self[origin + Vector.new([step, 0])].occupied? && food.nil?
     else
@@ -293,8 +307,59 @@ class Board
 
   # updates the last move recorded with a move from origin to destination
   def update_last_move(origin, destination)
-    @last_move = String.new unless !@last_move.nil? && @last_move.end_with?(', ') # if a castling move was made
+    unless !@last_move.nil? && @last_move.end_with?(', ') # if a castling/enpassant move was made
+      @last_move = String.new
+    end
     @last_move += "#{self[origin]} to #{self[destination]}"
+  end
+
+  # is an en-passant being attempted?
+  def enpassant_attempted?(origin, movement)
+    _, horizontal = movement.to_a
+    pawn = self[origin].piece
+    target = self[origin + Vector.new([0, horizontal])].piece
+    pawn.is_a?(Pawn) && !horizontal.zero? && target.is_a?(Pawn)
+  end
+
+  # is an en-passant allowed?
+  def enpassant_allowed?(origin, movement)
+    _, horizontal = movement.to_a
+    pawn = self[origin].piece
+    last_moves = parse_last_move
+    return false if last_moves.length != 1
+
+    start, fin = last_moves[0]
+    _, piece = start
+    fv = fin[0]
+    correct_piece = (piece == (pawn.white? ? pawn.black_symbol : pawn.white_symbol))
+    correct_location = (fv == origin + Vector.new([0, horizontal]))
+    correct_piece && correct_location
+  end
+
+  # execute an en-passant maneuver
+  def execute_enpassant(origin, movement)
+    _, horizontal = movement.to_a
+    target = self[origin + Vector.new([0, horizontal])]
+    @last_move = "killed #{target}, "
+    target.pop!
+  end
+
+  # parse last_move to get a list of vectors denoting move locations
+  def parse_last_move
+    moves = @last_move.split(', ')
+    moves.map! { |move| move.split(' to ') }
+    moves.map! do |move|
+      move.map! do |coord|
+        if Board.valid_coordinate?(coord[-2..-1])
+          if Board::COLUMN_TO_INDEX.key?(coord[0].to_sym)
+            [Board.location_vector(coord[-2..-1])]
+          else
+            [Board.location_vector(coord[-2..-1]), coord[0]]
+          end
+        end
+      end
+    end
+    moves.map { |move| move.reject(&:nil?) }
   end
 end
 
