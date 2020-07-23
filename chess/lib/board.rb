@@ -8,20 +8,20 @@ class Board
   (1..SIDE_LENGTH).each { |row| ROW_TO_INDEX[row] = SIDE_LENGTH - row }
   %i[a b c d e f g h].each_with_index { |col, i| COLUMN_TO_INDEX[col] = i }
   INDEX_TO_ROW = {}
-  INDEX_TO_COL = {}
+  INDEX_TO_COLUMN = {}
   (0...SIDE_LENGTH).each { |row| INDEX_TO_ROW[row] = SIDE_LENGTH - row }
-  %i[a b c d e f g h].each_with_index { |col, i| INDEX_TO_COL[i] = col }
+  %i[a b c d e f g h].each_with_index { |col, i| INDEX_TO_COLUMN[i] = col }
   SIDE_LENGTH.freeze
   ROW_TO_INDEX.freeze
   COLUMN_TO_INDEX.freeze
   INDEX_TO_ROW.freeze
-  INDEX_TO_COL.freeze
+  INDEX_TO_COLUMN.freeze
 
   def initialize
     @grid = Array.new(8) do |row|
       Array.new(8) do |col|
         gray = (row.even? ? col.even? : col.odd?) # every other tile is gray
-        Tile.new(Board::INDEX_TO_ROW[row], Board::INDEX_TO_COL[col], gray)
+        Tile.new(Board::INDEX_TO_ROW[row], Board::INDEX_TO_COLUMN[col], gray)
       end
     end
     @graveyard = { White: [], Black: [] }.freeze
