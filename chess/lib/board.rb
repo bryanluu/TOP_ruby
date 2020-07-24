@@ -340,8 +340,9 @@ class Board
   def execute_enpassant(origin, movement)
     _, horizontal = movement.to_a
     target = self[origin + Vector.new([0, horizontal])]
+    target_piece = target.pop!
     @last_move = "killed #{target}, "
-    target.pop!
+    @graveyard[target_piece.color] << target_piece # add captured pawn to graveyard
   end
 
   # parse last_move to get a list of vectors denoting move locations

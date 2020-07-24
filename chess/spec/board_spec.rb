@@ -131,13 +131,30 @@ describe Board do
       board.move_piece!([7, 4], [7, 2]) # castling maneuver
       expect(board[7, 2].piece.is_a?(King) && board[7, 3].piece.is_a?(Rook)).to be(true)
     end
-    it 'correctly moves a pawn in an en-passant capture is attempted' do
+    it 'correctly moves a pawn when an en-passant capture is attempted' do
       board = Board.new
       board.move_piece!([1, 0], [3, 0]) # move pawn forward
       board.move_piece!([3, 0], [4, 0]) # move pawn forward
       board.move_piece!([6, 1], [4, 1]) # move enemy pawn forward
       # en-passant capture
       expect(board.move_piece!([4, 0], [5, 1]) && !board[4, 1].occupied?).to be(true)
+    end
+    it 'correctly returns false when an invalid en-passant capture is attempted' do
+      board = Board.new
+      board.move_piece!([1, 0], [3, 0]) # move pawn forward
+      board.move_piece!([3, 0], [4, 0]) # move pawn forward
+      board.move_piece!([6, 1], [4, 1]) # move enemy pawn forward
+      board.move_piece!([6, 2], [4, 2]) # move enemy pawn forward
+      # en-passant capture attempt
+      expect(board.move_piece!([4, 0], [5, 1])).to be(false)
+    end
+    it 'correctly returns false when an invalid en-passant move is attempted' do
+      board = Board.new
+      board.move_piece!([1, 1], [3, 1]) # move pawn forward
+      board.move_piece!([3, 1], [4, 1]) # move pawn forward
+      board.move_piece!([6, 2], [4, 2]) # move enemy pawn forward
+      # en-passant capture attempt
+      expect(board.move_piece!([4, 1], [5, 0])).to be(false)
     end
   end
   describe '#location_vector' do
