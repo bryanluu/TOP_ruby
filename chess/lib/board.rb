@@ -81,6 +81,8 @@ class Board
   # attempts to move the piece at origin to destination,
   # returns false if not possible, otherwise moves the piece and returns true
   def move_piece!(origin, destination)
+    origin = Board.location_vector(origin) if origin.is_a? String
+    destination = Board.location_vector(destination) if destination.is_a? String
     origin = Vector.new(origin) unless origin.is_a? Vector
     destination = Vector.new(destination) unless destination.is_a? Vector
     return false unless self[origin].occupied?
