@@ -96,6 +96,7 @@ class Board
 
       castle_rook(origin, movement)
     end
+    piece = promote_pawn(piece, prompt_promotion_class) if promotion_allowed?(piece, destination)
     update_last_move(origin, destination)
     self[origin].pop!.move!
     replaced = self[destination].replace!(piece)
@@ -342,8 +343,8 @@ class Board
   def execute_enpassant(origin, movement)
     _, horizontal = movement.to_a
     target = self[origin + Vector.new([0, horizontal])]
-    target_piece = target.pop!
     @last_move = "killed #{target}, "
+    target_piece = target.pop!
     @graveyard[target_piece.color] << target_piece # add captured pawn to graveyard
   end
 
@@ -363,6 +364,30 @@ class Board
       end
     end
     moves.map { |move| move.reject(&:nil?) }
+  end
+
+  # is promotion of the piece moving to destination allowed?
+  def promotion_allowed?(piece, destination)
+    eigth_rank = (piece.white? ? 0 : Board::SIDE_LENGTH - 1)
+    vertical, = destination.to_a
+
+    piece.is_a?(Pawn) && vertical == eigth_rank
+  end
+
+  # promote the pawn to the given class
+  def promote_pawn(pawn, piece)
+    new_piece = piece.new(pawn.color)
+    new_piece.move!
+    @last_move = "#{pawn.symbol}->#{new_piece.symbol}, "
+    new_piece
+  end
+
+  # request selection of promotion class
+  def prompt_promotion_class
+    classes = { 1 => Queen, 2 => Rook, 3 => Bishop, 4 => Knight }.freeze
+    puts 'Select promotion class by choosing a number between 1-4:'
+    puts classes
+    classes[gets.chomp.to_i]
   end
 end
 
