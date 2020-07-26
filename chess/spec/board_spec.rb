@@ -166,4 +166,29 @@ describe Board do
       expect{Board.location_vector('a9')}.to raise_error(KeyError)
     end
   end
+  describe '#king_is_dead?' do
+    it 'correctly returns false for default start positions' do
+      board = Board.new
+      colors = %i[White Black].freeze
+      expect(board.king_is_dead?(colors.sample)).to be(false)
+    end
+    it 'correctly returns true for a dead Black king' do
+      board = Board.new
+      board.move_piece!('a2', 'a4')
+      board.move_piece!('a1', 'a3')
+      board.move_piece!('a3', 'e3')
+      board.move_piece!('e3', 'e7')
+      board.move_piece!('e7', 'e8')
+      expect(board.king_is_dead?(:Black)).to be(true)
+    end
+    it 'correctly returns true for a dead White king' do
+      board = Board.new
+      board.move_piece!('a7', 'a5')
+      board.move_piece!('a8', 'a6')
+      board.move_piece!('a6', 'e6')
+      board.move_piece!('e6', 'e2')
+      board.move_piece!('e2', 'e1')
+      expect(board.king_is_dead?(:White)).to be(true)
+    end
+  end
 end

@@ -124,6 +124,11 @@ class Board
     array.none?(&:nil?)
   end
 
+  # whether the king of given color is dead
+  def king_is_dead?(color)
+    @graveyard[color].any? { |piece| piece.is_a? King }
+  end
+
   private
 
   # spawn Chess pieces at default positions
