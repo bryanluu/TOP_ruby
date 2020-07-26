@@ -191,4 +191,22 @@ describe Board do
       expect(board.king_is_dead?(:White)).to be(true)
     end
   end
+  describe '#locations_of_pieces' do
+    it 'correctly returns the location of White pieces' do
+      board = Board.new
+      locs = board.locations_of_pieces(:White)
+      correct = locs.all? do |str|
+        board[str[1..-1]].piece.symbol == str[0]
+      end
+      expect(correct).to be(true)
+    end
+    it 'correctly returns the location of Black pieces' do
+      board = Board.new
+      locs = board.locations_of_pieces(:Black)
+      correct = locs.all? do |str|
+        board[str[1..-1]].piece.symbol == str[0]
+      end
+      expect(correct).to be(true)
+    end
+  end
 end

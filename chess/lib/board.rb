@@ -81,8 +81,8 @@ class Board
   # attempts to move the piece at origin to destination,
   # returns false if not possible, otherwise moves the piece and returns true
   def move_piece!(origin, destination)
-    origin = Board.location_vector(origin) if origin.is_a? String
-    destination = Board.location_vector(destination) if destination.is_a? String
+    origin = Board.location_vector(origin[-2..-1]) if origin.is_a? String
+    destination = Board.location_vector(destination[-2..-1]) if destination.is_a? String
     origin = Vector.new(origin) unless origin.is_a? Vector
     destination = Vector.new(destination) unless destination.is_a? Vector
     return false unless self[origin].occupied?
@@ -127,6 +127,17 @@ class Board
   # whether the king of given color is dead
   def king_is_dead?(color)
     @graveyard[color].any? { |piece| piece.is_a? King }
+  end
+
+  # returns all piece locations of the given color
+  def locations_of_pieces(color)
+    locs = []
+    @grid.each do |row|
+      locs += row.filter do |tile|
+        tile.occupied? && tile.piece.color == color
+      end.map(&:to_s)
+    end
+    locs
   end
 
   private
