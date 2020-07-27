@@ -20,6 +20,11 @@ class Piece
   # do nothing by default
   def move!; end
 
+  # get a frozen copy of moveset
+  def moves
+    @moveset[0..-1].freeze
+  end
+
   def white_symbol
     nil
   end
