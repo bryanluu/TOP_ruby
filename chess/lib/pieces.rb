@@ -210,5 +210,3 @@ class Pawn < Piece
     @moveset.delete([2 * step, 0])
   end
 end
-
-# binding.pry
