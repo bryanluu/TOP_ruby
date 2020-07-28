@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'pieces'
-require 'pry'
 
 # implements a Chess game
 class Game
@@ -38,13 +37,25 @@ class Game
   end
 
   def prompt_origin
-    puts 'Enter piece location:'
-    repeat_until_success { Board.location_vector(gets.chomp) }
+    puts "Enter piece location (or '--save filename' to save the game):"
+    input = gets.chomp
+    while save?(input)
+      save(input)
+      puts "Enter piece location (or '--save filename' to save the game):"
+      input = gets.chomp
+    end
+    repeat_until_success { Board.location_vector(input) }
   end
 
   def prompt_destination
-    puts 'Enter destination:'
-    repeat_until_success { Board.location_vector(gets.chomp) }
+    puts "Enter destination (or '--save filename' to save the game):"
+    input = gets.chomp
+    while save?(input)
+      save(input)
+      puts "Enter destination (or '--save filename' to save the game):"
+      input = gets.chomp
+    end
+    repeat_until_success { Board.location_vector(input) }
   end
 
   # repeat block until success
@@ -64,6 +75,35 @@ class Game
   def toggle_turn
     @turn = Piece.opposite(@turn)
   end
+
+  def save?(input)
+    input.split.first == '--save'
+  end
+
+  def save(input)
+    filename = input.split.last + '.save'
+    if File.exist? filename
+      puts "Overwrite #{filename}?"
+      return unless affirmative?
+    end
+    File.open(filename, 'w') do |file|
+      file.puts Marshal.dump(self) # save Game as binary string to filename
+    end
+    puts "Saved game to #{filename}."
+  end
 end
 
-binding.pry
+def affirmative?
+  input = gets.chomp.downcase
+  %w[y yes].include? input
+end
+
+puts 'Load game from file?'
+if affirmative?
+  puts 'Enter name:'
+  obj = File.read(gets.chomp + '.save')
+  game = Marshal.load(obj)
+else
+  game = Game.new
+end
+game.play
