@@ -7,14 +7,19 @@ class Game
   def initialize
     @board = Board.new
     @turn = :White
+    @forfeit = false
   end
 
   def play
-    play_round until @board.king_is_dead?(@turn)
+    play_round until game_over?
     puts "#{Piece::TEAM_ICONS[Piece.opposite(@turn)]} wins!"
   end
 
   private
+
+  def game_over?
+    @forfeit || @board.king_is_dead?(@turn)
+  end
 
   def play_round
     success = false
@@ -22,6 +27,8 @@ class Game
       puts "--- #{Piece::TEAM_ICONS[@turn]} turn ---"
       @board.display
       origin = prompt_origin
+      return if @forfeit
+
       correct_piece = @board[origin].occupied? && @board[origin].piece.color == @turn
       if correct_piece
         puts "#{@board[origin]} selected."
@@ -30,6 +37,8 @@ class Game
         next
       end
       destination = prompt_destination
+      return if @forfeit
+
       success = @board.move_piece!(origin, destination)
       puts 'Invalid move!' unless success
     end
@@ -37,13 +46,15 @@ class Game
   end
 
   def prompt_origin
-    puts "Enter piece location (or '--save filename' to save the game):"
+    puts "Enter piece location (or '--save filename' to save the game, '--forfeit' to forfeit):"
     input = gets.chomp
     while save?(input)
       save(input)
-      puts "Enter piece location (or '--save filename' to save the game):"
+      puts "Enter piece location (or '--save filename' to save the game, '--forfeit' to forfeit):"
       input = gets.chomp
     end
+    return if forfeit?(input)
+
     repeat_until_success { Board.location_vector(input) }
   end
 
@@ -55,6 +66,8 @@ class Game
       puts "Enter destination (or '--save filename' to save the game):"
       input = gets.chomp
     end
+    return if forfeit?(input)
+
     repeat_until_success { Board.location_vector(input) }
   end
 
@@ -78,6 +91,10 @@ class Game
 
   def save?(input)
     input.split.first == '--save'
+  end
+
+  def forfeit?(input)
+    @forfeit = (input == '--forfeit')
   end
 
   def save(input)
