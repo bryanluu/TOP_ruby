@@ -12,7 +12,7 @@ class Game
 
   def play
     play_round until @board.king_is_dead?(@turn)
-    puts "#{Piece.opposite(@turn)} wins!"
+    puts "#{Piece::TEAM_ICONS[Piece.opposite(@turn)]} wins!"
   end
 
   private
@@ -39,30 +39,26 @@ class Game
 
   def prompt_origin
     puts 'Enter piece location:'
-    repeat = true
-    while repeat
-      begin
-        origin = Board.location_vector(gets.chomp)
-        repeat = false
-      rescue KeyError => e
-        repeat = true
-      end
-    end
-    origin
+    repeat_until_success { Board.location_vector(gets.chomp) }
   end
 
   def prompt_destination
     puts 'Enter destination:'
+    repeat_until_success { Board.location_vector(gets.chomp) }
+  end
+
+  # repeat block until success
+  def repeat_until_success
     repeat = true
     while repeat
       begin
-        destination = Board.location_vector(gets.chomp)
+        result = yield
         repeat = false
-      rescue KeyError => e
+      rescue StandardError
         repeat = true
       end
     end
-    destination
+    result
   end
 
   def toggle_turn
@@ -70,4 +66,4 @@ class Game
   end
 end
 
-# binding.pry
+binding.pry
