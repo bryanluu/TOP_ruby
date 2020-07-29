@@ -46,12 +46,13 @@ class Game
       success = @board.move_piece!(origin, destination)
       puts 'Invalid move!' unless success
     end
+    puts 'Press [Enter] to continue...' if @cpu[@turn]
     gets if @cpu[@turn]
     toggle_turn
   end
 
   def display_state
-    puts "------ #{Piece::TEAM_ICONS[@turn]} turn ------"
+    puts "------ #{Piece::TEAM_ICONS[@turn]} " + (@cpu[@turn] ? '(CPU) ' : '') + 'turn ------'
     @board.display
   end
 
@@ -60,7 +61,7 @@ class Game
     origin = Board.location_vector(loc) # convert to location vector
     movement = @board[origin].piece.moves.sample # choose random move
     destination = origin + movement
-    @board.move_piece!(origin, destination)
+    @board.move_piece!(origin, destination, true)
   end
 
   def prompt_cpu

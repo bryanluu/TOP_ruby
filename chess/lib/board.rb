@@ -80,7 +80,7 @@ class Board
 
   # attempts to move the piece at origin to destination,
   # returns false if not possible, otherwise moves the piece and returns true
-  def move_piece!(origin, destination)
+  def move_piece!(origin, destination, cpu = false)
     origin = Board.location_vector(origin[-2..-1]) if origin.is_a? String
     destination = Board.location_vector(destination[-2..-1]) if destination.is_a? String
     origin = Vector.new(origin) unless origin.is_a? Vector
@@ -96,7 +96,7 @@ class Board
 
       castle_rook(origin, movement)
     end
-    piece = promote_pawn(piece, prompt_promotion_class) if promotion_allowed?(piece, destination)
+    piece = promote_pawn(piece, prompt_promotion_class(cpu)) if promotion_allowed?(piece, destination)
     update_last_move(origin, destination)
     self[origin].pop!.move!
     replaced = self[destination].replace!(piece)
@@ -368,6 +368,8 @@ class Board
 
   # parse last_move to get a list of vectors denoting move locations
   def parse_last_move
+    return [] if @last_move.nil?
+
     moves = @last_move.split(', ')
     moves.map! { |move| move.split(' to ') }
     moves.map! do |move|
@@ -401,11 +403,15 @@ class Board
   end
 
   # request selection of promotion class
-  def prompt_promotion_class
+  def prompt_promotion_class(cpu = false)
     classes = { 1 => Queen, 2 => Rook, 3 => Bishop, 4 => Knight }.freeze
     puts 'Select promotion class by choosing a number between 1-4:'
     puts classes
-    classes[gets.chomp.to_i]
+    if cpu
+      classes[Array(1..4).sample]
+    else
+      classes[gets.chomp.to_i]
+    end
   end
 end
 
