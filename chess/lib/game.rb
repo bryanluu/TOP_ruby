@@ -8,6 +8,7 @@ class Game
     @board = Board.new
     @turn = :White
     @forfeit = false
+    @cpu = prompt_cpu
   end
 
   def play
@@ -24,7 +25,7 @@ class Game
   def play_round
     success = false
     until success
-      puts "--- #{Piece::TEAM_ICONS[@turn]} turn ---"
+      puts "------ #{Piece::TEAM_ICONS[@turn]} turn ------"
       @board.display
       origin = prompt_origin
       return if @forfeit
@@ -43,6 +44,17 @@ class Game
       puts 'Invalid move!' unless success
     end
     toggle_turn
+  end
+
+  def prompt_cpu
+    puts 'CPU player?'
+    cpu = { White: false, Black: false }
+    if affirmative?
+      puts 'Which team? (Black/White/both)'
+      ans = gets.chomp
+      ans == 'both' ? cpu.keys.each { |team| cpu[team] = true } : cpu[ans.to_sym] = true
+    end
+    cpu
   end
 
   def prompt_origin
@@ -115,7 +127,7 @@ def affirmative?
   %w[y yes].include? input
 end
 
-puts 'Load game from file?'
+puts 'Load game from file? (y/n)'
 if affirmative?
   puts 'Enter name:'
   obj = File.read(gets.chomp + '.save')
