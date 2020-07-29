@@ -24,9 +24,12 @@ class Game
 
   def play_round
     success = false
+    display_state if @cpu[@turn]
     until success
-      puts "------ #{Piece::TEAM_ICONS[@turn]} turn ------"
-      @board.display
+      display_state unless @cpu[@turn]
+      success = choose_random_move if @cpu[@turn]
+      next if @cpu[@turn]
+
       origin = prompt_origin
       return if @forfeit
 
@@ -43,11 +46,25 @@ class Game
       success = @board.move_piece!(origin, destination)
       puts 'Invalid move!' unless success
     end
+    gets if @cpu[@turn]
     toggle_turn
   end
 
+  def display_state
+    puts "------ #{Piece::TEAM_ICONS[@turn]} turn ------"
+    @board.display
+  end
+
+  def choose_random_move
+    loc = @board.locations_of_pieces(@turn).sample # choose random piece
+    origin = Board.location_vector(loc) # convert to location vector
+    movement = @board[origin].piece.moves.sample # choose random move
+    destination = origin + movement
+    @board.move_piece!(origin, destination)
+  end
+
   def prompt_cpu
-    puts 'CPU player?'
+    puts 'CPU player? (y/n)'
     cpu = { White: false, Black: false }
     if affirmative?
       puts 'Which team? (Black/White/both)'

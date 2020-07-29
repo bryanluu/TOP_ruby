@@ -106,6 +106,7 @@ class Board
 
   # return the location vector associated with the Chess coordinate string
   def self.location_vector(coordinate)
+    coordinate = coordinate[-2..-1]
     col, row = coordinate.split('')
     col = col.to_sym
     row = row.to_i
@@ -186,6 +187,7 @@ class Board
 
   # checks whether path is valid for knight
   def valid_knight_path?(origin, destination)
+    piece = self[origin].piece
     movement = destination - origin
     knight = self[origin].piece
     food = self[destination].piece

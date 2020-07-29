@@ -2,7 +2,6 @@
 
 require_relative 'board'
 require_relative 'vector'
-require 'pry'
 
 # Implements a Chess piece
 class Piece
