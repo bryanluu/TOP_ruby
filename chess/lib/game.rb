@@ -13,7 +13,8 @@ class Game
 
   def play
     play_round until game_over?
-    puts "#{Piece::TEAM_ICONS[Piece.opposite(@turn)]} wins!"
+    @board.display
+    puts "#{team_name(Piece.opposite(@turn))} wins!"
   end
 
   private
@@ -52,8 +53,12 @@ class Game
   end
 
   def display_state
-    puts "------ #{Piece::TEAM_ICONS[@turn]} " + (@cpu[@turn] ? '(CPU) ' : '') + 'turn ------'
+    puts "------ #{team_name(@turn)} turn ------"
     @board.display
+  end
+
+  def team_name(color)
+    "#{Piece::TEAM_ICONS[color]} " + (@cpu[color] ? '(CPU) ' : '')
   end
 
   def choose_random_move
