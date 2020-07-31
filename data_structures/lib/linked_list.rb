@@ -160,7 +160,7 @@ class LinkedList
       str << '( ' << curr.value.to_s << ' )' << ' -> '
       curr = curr.next
     end
-    str << "nil"
+    str << 'nil'
     str
   end
 end
