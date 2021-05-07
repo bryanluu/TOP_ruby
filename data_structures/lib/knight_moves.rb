@@ -118,8 +118,20 @@ def knight_moves(origin, destination)
   puts board
 end
 
-puts "Enter the Knight's origin as two numbers between 0-7 spaced apart:"
-origin = gets.chomp.split.map(&:to_i)
-puts "Enter the Knight's destination as two numbers between 0-7 spaced apart:"
-destination = gets.chomp.split.map(&:to_i)
+begin
+  puts "Enter the Knight's origin as two numbers between 0-7 spaced apart:"
+  origin = gets.chomp.split.map(&:to_i)
+  valid = origin.all? {|x| (x.class == Integer) && (0 <= x && x <= 7)}
+  raise StandardError, "Invalid position given" unless valid
+rescue StandardError => e
+  puts e
+  retry
+else;
+end
+begin
+  puts "Enter the Knight's destination as two numbers between 0-7 spaced apart:"
+  destination = gets.chomp.split.map(&:to_i)
+  valid = destination.all? {|x| (x.class == Integer) && (0 <= x && x <= 7)}
+  raise StandardError, "Invalid position given" unless valid
+end
 knight_moves(origin, destination)
