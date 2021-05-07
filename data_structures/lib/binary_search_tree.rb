@@ -25,8 +25,15 @@ end
 class Tree
   attr_reader :root
 
-  def initialize(array = [])
-    @root = build_tree(array)
+  def initialize(array = [], show=false)
+    @root = build_tree(array.sort.uniq)
+    pretty_print if show
+  end
+
+  def pretty_print(node = @root, prefix = '', is_left = true)
+    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
+    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
+    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
   end
 
   private
@@ -35,11 +42,10 @@ class Tree
   def build_tree(array)
     return nil if array.empty?
 
-    a = array.sort.uniq
-    mid = a.length / 2
-    node = Node.new(a[mid])
-    node.left = build_tree(a[0...mid])
-    node.right = build_tree(a[mid+1..-1])
+    mid = (array.length - 1) / 2
+    node = Node.new(array[mid])
+    node.left = build_tree(array[0...mid])
+    node.right = build_tree(array[mid+1..-1])
     node
   end
 
@@ -187,7 +193,7 @@ class Tree
 
   # rebalances the tree
   def rebalance!
-    @root = build_tree(level_order)
+    @root = build_tree(inorder.map {|node| node.data})
   end
 
   # checks whether correct BST
@@ -214,8 +220,9 @@ class Tree
   end
 end
 
+
 array = Array.new(15) { rand(0..100) } # random array of numbers between 0 and 100
-tree = Tree.new(array) # create tree using random array
+tree = Tree.new(array, show=true) # create tree using random array
 puts tree.balanced?
 p tree.level_order
 p tree.preorder
@@ -223,8 +230,10 @@ p tree.postorder
 p tree.inorder
 5.times { tree.insert(rand(101..110)) }
 puts tree.balanced?
+tree.pretty_print
 tree.rebalance!
 puts tree.balanced?
+tree.pretty_print
 p tree.level_order
 p tree.preorder
 p tree.postorder
@@ -234,3 +243,6 @@ p tree.level_order
 p tree.preorder
 p tree.postorder
 p tree.inorder
+puts "="*50
+tree.pretty_print
+puts tree.root.data
