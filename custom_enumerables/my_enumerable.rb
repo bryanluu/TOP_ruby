@@ -55,6 +55,22 @@ module Enumerable
     c
   end
 
+  def my_map
+    result = self.class.new
+    my_each do |item|
+      result.append yield(item)
+    end
+    result
+  end
+
+  def my_inject
+    memo = nil
+    my_each do |item|
+      memo = (memo.nil? ? item : yield(memo, item))
+    end
+    memo
+  end
+
 end
 
 def compare(method)
@@ -67,8 +83,10 @@ def compare(method)
     block = Proc.new { |x| puts x }
   when "each_with_index"
     block = Proc.new { |x, i| puts "#{x}, #{i}" }
-  when "select", "all?", "any?", "none?", "count"
+  when "select", "all?", "any?", "none?", "count", "map"
     block = Proc.new { |x| x % 2 == 0 }
+  when "inject"
+    block = Proc.new { |memo, item| memo * item }
   else
     puts "my_#{method} unsupported"
     return
