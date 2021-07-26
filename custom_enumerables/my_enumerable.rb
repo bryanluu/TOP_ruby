@@ -25,6 +25,36 @@ module Enumerable
     end
     result
   end
+
+  def my_all?
+    my_each do |item|
+      return false unless yield(item)
+    end
+    true
+  end
+
+  def my_any?
+    my_each do |item|
+      return true if yield(item)
+    end
+    false
+  end
+
+  def my_none?
+    my_each do |item|
+      return false if yield(item)
+    end
+    true
+  end
+
+  def my_count
+    c = 0
+    my_each do |item|
+      c += 1 if yield(item)
+    end
+    c
+  end
+
 end
 
 def compare(method)
@@ -37,7 +67,7 @@ def compare(method)
     block = Proc.new { |x| puts x }
   when "each_with_index"
     block = Proc.new { |x, i| puts "#{x}, #{i}" }
-  when "select"
+  when "select", "all?", "any?", "none?", "count"
     block = Proc.new { |x| x % 2 == 0 }
   else
     puts "my_#{method} unsupported"
