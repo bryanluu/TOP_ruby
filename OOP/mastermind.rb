@@ -10,19 +10,19 @@ class Code
   attr_reader :row
 
   def initialize(code)
-    @row = []
-    code.each { |x| @row << COLORS[x] }
+    row = []
+    code.each { |x| row << COLORS[x] }
   end
 
   def to_s
-    @row.to_s
+    row.to_s
   end
 
   # returns a counter hash
   def count
     map = {}
     COLORS.values.each { |v| map[v] = 0 }
-    @row.each do |x|
+    row.each do |x|
       map[x] = map[x] + 1
     end
     map
@@ -37,13 +37,13 @@ class Code
     end
     code.row.each_with_index do |x, i|
       # prepend a red peg and remove a white peg for correct pegs in code
-      feedback.unshift(2) and feedback.pop if x == @row[i]
+      feedback.unshift(2) and feedback.pop if x == row[i]
     end
     feedback
   end
 
   def correct?(code)
-    @row == code.row
+    row == code.row
   end
 end
 
@@ -54,18 +54,18 @@ class Board
   attr_reader :code, :turns
 
   def initialize(code)
-    @code = Code.new(code)
-    @turns = 0
+    code = Code.new(code)
+    turns = 0
   end
 
   def guess(code)
-    @turns += 1
-    puts "Turn: #{@turns}"
+    turns += 1
+    puts "Turn: #{turns}"
     guessed = Code.new(code)
     puts 'Guess:'
     puts guessed
     puts 'Feedback:'
-    feedback = @code.compare(guessed)
+    feedback = code.compare(guessed)
     p(feedback.map { |x| Code::COLORS[x] })
     puts 'Press enter to continue...'
     gets
@@ -74,16 +74,18 @@ class Board
 
   def code_broken?(code)
     guessed = Code.new(code)
-    guessed.correct? @code
+    guessed.correct? code
   end
 
   def out_of_turns?
-    @turns >= MAX_TURNS
+    turns >= MAX_TURNS
   end
 end
 
 # Game of Mastermind
 class Game
+  attr_reader :repeats_allowed
+  attr_accessor :unused_codes, :codeset, :codemaker_cpu, :codebreaker_cpu
   def initialize
     repeats_allowed, codemaker_cpu, codebreaker_cpu = prompt_config
     @repeats_allowed = repeats_allowed
@@ -151,23 +153,23 @@ class Game
 
   # get a Knuth solution from the set
   def get_next_knuth_code(codes)
-    codes.each { |c| return c if @codeset.include?(c) }
-    codes.each { |c| return c if @unused_codes.include?(c) }
+    codes.each { |c| return c if codeset.include?(c) }
+    codes.each { |c| return c if unused_codes.include?(c) }
     codes[0] # never reached
   end
 
   # Knuth solution
   def guess_knuth(guess, feedback)
-    if @unused_codes.nil?
-      @unused_codes = all_possible_codes
-      @unused_codes.delete(guess)
-      @codeset = purge_code_set(@unused_codes, guess, feedback)
+    if unused_codes.nil?
+      unused_codes = all_possible_codes
+      unused_codes.delete(guess)
+      codeset = purge_code_set(unused_codes, guess, feedback)
     else
-      @codeset = purge_code_set(@codeset, guess, feedback)
+      codeset = purge_code_set(codeset, guess, feedback)
     end
-    codes = minimax(@codeset, @unused_codes)
+    codes = minimax(codeset, unused_codes)
     code = get_next_knuth_code(codes)
-    @unused_codes.delete(code)
+    unused_codes.delete(code)
   end
 
   # prompt config
@@ -194,7 +196,7 @@ class Game
 
   # generate a guess for the code
   def guess_code(guess=nil, feedback=nil)
-    if @codebreaker_cpu
+    if codebreaker_cpu
       if guess.nil? || feedback.nil?
         random_code
       else
@@ -207,7 +209,7 @@ class Game
 
   # generate a code
   def generate_code
-    if @codemaker_cpu
+    if codemaker_cpu
       puts 'Code chosen by CPU.'
       random_code
     else
@@ -217,7 +219,7 @@ class Game
 
   # generates a random code
   def random_code
-    if @repeats_allowed
+    if repeats_allowed
       code = []
       4.times { code << Code::COLORS.keys.sample }
       code
@@ -230,7 +232,7 @@ class Game
   def prompt_code
     code_prompt
     trialcode = gets.chomp.split.map(&:to_i)
-    return trialcode if @repeats_allowed
+    return trialcode if repeats_allowed
 
     while has_repeats?(trialcode)
       puts 'No repeats allowed!'
